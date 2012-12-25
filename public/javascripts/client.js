@@ -22,14 +22,26 @@ if (!$ || !CryptoJS){
 		$("#login,#pass,#path").change(function(){
 		load()
 		});
-		$("#input").change(function(){
-			save();
-		});
+		//autosave before changing account or doc
+		$("#input").focusout(function(event){save();})
+		//handle ctrl+s
+		$("#input").keypress(function(event) {
+			console.log(event.metakey);
+    	if (!(event.which == 115 && event.ctrlKey) && !(event.which == 19)){
+    	 return true;
+    	} else {
+    		save();
+    		event.preventDefault();
+    		return false;
+    	}
+});
+
+
 	}
 //TODO use login+key as sha1 to avoid transmission of the encrypted key and thirdpart overidding
 function load(){
 	console.log("loading");
-	$("#input").val("");
+	$("#input").html("");
 	var login=$("#login").val();
 	var pass=$("#pass").val();
 	var path=$("#path").val();
@@ -40,14 +52,14 @@ function load(){
 	if(source){
 		var raw=CryptoJS.AES.decrypt(source,pass);
 		var result=CryptoJS.enc.Utf8.stringify(raw);
-		$("#input").val(result.toString());
+		$("#input").html(result.toString());
 		console.log("Loaded");
 	}
 }
 
 function save(){
 	console.log("saving")
-	var input=$("#input").val();
+	var input=$("#input").html();
 	var login=$("#login").val();
 	var pass=$("#pass").val();
 	var path=$("#path").val();

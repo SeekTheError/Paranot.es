@@ -44,9 +44,6 @@
           <a class="brand" href="/">Paranot.es</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
-              <li class="">
-                <a href="./index.html">Home</a>
-              </li>
               <li>
               	<input id="login" type="text" placeholder="Login"/>
               </li>
@@ -65,11 +62,14 @@
       </div>
     </div>
     <div class="content">
-    	<textarea id="input">Hello and welcome,
+    	<div id="input" contenteditable="true" >Hello and welcome,<br/>
 
-To start, chose your key
+    		To start, enter a login and a password (paths are static for nom)<br/>
 
-Lost, Just follow the about Link</textarea>
+			You can edit anydocument by simply clicking it<br/>
+
+			The save is performed either if the text part loose focus or if you press ctrl+s
+		</div>
     </div>
 </body>
 </html>
