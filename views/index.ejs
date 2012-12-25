@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>Paranot.es</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="author" content="">
+<!-- Styles -->
+<link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href="/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+<link rel='stylesheet' href='/stylesheets/style.css' />
+<!-- Scripts -->
+<script src="/javascripts/vendor/jquery.js"></script>
+<script src="/javascripts/vendor/cryptojs/sha1.js"></script>
+<script src="/javascripts/vendor/cryptojs/aes.js"></script>
+<script src="/javascripts/client.js"></script>
+<script>	
+	$(document).ready(function() {
+		// IE "console"
+		if (!window.console) {
+			window.console = {};
+			window.console.log = function() {}
+			window.console.error = function(){}
+		}
+		pn.init();
+		
+	});
+</script>
+<!--[if lt IE 9]>
+      <script> alert("This website is not compatible with your browser yet");</script>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+</head>
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="/">Paranot.es</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="">
+                <a href="./index.html">Home</a>
+              </li>
+              <li>
+              	<input id="key" type="password"/>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="content">
+    	<textarea id="input"></textarea>
+    </div>
+</body>
+</html>
