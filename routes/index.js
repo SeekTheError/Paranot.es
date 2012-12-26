@@ -8,6 +8,7 @@ exports.index = function(req, res){
 };
 
 exports.save = function(req, res){
+	console.log(req.body);
   res.render('index', { title: 'Express' });
 };
 
