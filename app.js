@@ -5,7 +5,7 @@
 var express = require('express'),
   routes = require('./routes'),
   http = require('http'),
-  path = require('path');
+  path = require('path'); 
 
 var app = express();
 
@@ -27,6 +27,8 @@ app.configure('development', function() {
 
 app.get('/', routes.index);
 app.post('/save', routes.save);
+app.post('/createUser', routes.createUser);
+app.post('/checkUser', routes.checkUser);
 app.post('/load', routes.load);
 
 http.createServer(app).listen(app.get('port'), function() {
@@ -34,9 +36,3 @@ http.createServer(app).listen(app.get('port'), function() {
 });
 
 
-var redis = require("redis"),
-  client = redis.createClient();
-
-client.on("error", function(err) {
-  console.log("Error " + err);
-});

@@ -11,13 +11,15 @@ r = CryptoJS.enc.Utf8.stringify(decrypted);
   key : the sha1 of login+pass, used as an index in the local store
 */
 var pn = function($, CryptoJS) {
-		Store = [];
 		if(!$ || !CryptoJS) {
 			console.error("Missing Dependencies");
 		}
 
 		this.init = function() {
-			$("#pass,#path").change(function() {
+			$("#pass").change(function() {
+				checkUser()
+			});
+			$("#path").change(function() {
 				load()
 			});
 			//autosave before changing account or doc
@@ -26,7 +28,6 @@ var pn = function($, CryptoJS) {
 			})
 			//handle ctrl+s
 			$("#input").keypress(function(event) {
-				console.log(event.metakey);
 				if(!(event.which == 115 && event.ctrlKey) && !(event.which == 19)) {
 					return true;
 				} else {
@@ -47,10 +48,28 @@ var pn = function($, CryptoJS) {
 			var pass = $("#pass").val();
 			var path = $("#path").val();
 			var key = CryptoJS.SHA1(login + pass).toString();
-			if(Store[key] && Store[key][path]) {
-				var source = Store[key][path];
+			var url = "load";
+			var data = {
+				login: encodeURIComponent(login),
+				key: encodeURIComponent(key),
+				path: encodeURIComponent(path),
 			}
+			console.log("loading on" + url)
+			$.ajax({
+				url: url,
+				type: 'POST',
+				data: data
+			}).done(function(data) {
+				dispatch(data);
+			})
+
+
+			
+		}
+
+		function displayContent(source) {
 			if(source) {
+				var pass = $("#pass").val();
 				var raw = CryptoJS.AES.decrypt(source, pass);
 				var result = CryptoJS.enc.Utf8.stringify(raw);
 				$("#input").html(result.toString());
@@ -65,36 +84,117 @@ var pn = function($, CryptoJS) {
 			var pass = $("#pass").val();
 			//prevent useless save on the welcome page
 			if(login == "" || pass == "") {
+				console.log("abort")
 				return false;
 			}
 			var path = $("#path").val();
 			var content = CryptoJS.AES.encrypt(input, pass).toString();
 			var key = CryptoJS.SHA1(login + pass).toString();
-			
+
 			var url = "/save";
-			var data={
+			var data = {
 				login: encodeURIComponent(login),
 				key: encodeURIComponent(key),
 				path: encodeURIComponent(path),
 				content: content
 			}
-			console.log("saving on"+url)
+			console.log("saving on" + url)
 			$.ajax({
 				url: url,
 				type: 'POST',
 				data: data
-			}).done(function(data){console.log(data)})
-			
-			//Store[key][path] = result
-			//console.log("Saved");
-			//console.log(Store);
+			}).done(function(data) {
+				dispatch(data);
+			})
+
 		}
 
+		function checkUser() {
+			console.log("checking user");
+			var input = $("#input").html();
+			var login = $("#login").val();
+			var pass = $("#pass").val();
+			//prevent useless save on the welcome page
+			if(login == "" || pass == "") {
+				console.log("abort")
+				return false;
+			}
+			var key = CryptoJS.SHA1(login + pass).toString();
+
+			var url = "/checkUser";
+			var data = {
+				login: encodeURIComponent(login),
+				key: encodeURIComponent(key)
+			}
+			console.log("checkin user: " + login)
+			$.ajax({
+				url: url,
+				type: 'POST',
+				data: data
+			}).done(function(data) {
+				dispatch(data);
+			})
+		}
+
+		function createUser() {
+			console.log("creating user");
+			var input = $("#input").html();
+			var login = $("#login").val();
+			var pass = $("#pass").val();
+			//prevent useless save on the welcome page
+			if(login == "" || pass == "") {
+				console.log("abort")
+				return false;
+			}
+			var key = CryptoJS.SHA1(login + pass).toString();
+
+			var url = "/createUser";
+			var data = {
+				login: encodeURIComponent(login),
+				key: encodeURIComponent(key)
+			}
+			console.log("saving on" + url)
+			$.ajax({
+				url: url,
+				type: 'POST',
+				data: data
+			}).done(function(data) {
+				dispatch(data);
+			})
+		}
 		//Implement create path
 		//extract the load and save method to server
 		//define unicity: key? username? etc...
 		//unicity on login
 		//client side key on sha(login+key)
+
+		function dispatch(response) {
+			console.log(response);
+			if(response.status == "userDontExist") {
+				var create = window.confirm("This account does not exist, do you want to create it?")
+				if(create) {
+					createUser()
+				}
+			}
+			if(response.status == "userExist") {
+				console.log("User Exist")
+				load()
+			}
+			if(response.status == "userCreated") {
+				//saving the new content on user created 
+				console.log("userCreated");
+			}
+			if(response.status == "pathDontExist"){
+				var create = window.confirm("This file does not exist, do you want to create it?")
+				if(create) {
+					save()
+				}
+			}
+			if(response.status == "loaded"){
+				displayContent(response.content)
+			}
+
+		}
 
 		return this;
 
