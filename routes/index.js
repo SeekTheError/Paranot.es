@@ -30,10 +30,10 @@ exports.save = function(req, res) {
 				status: "userDontExist"
 			});
 		} else {
-			if(reply != params.key){
+			if(reply != params.key) {
 				res.send({
-						status: "refused"
-					});
+					status: "refused"
+				});
 			}
 			var contentPath = userNamespace + ":" + params.path
 			client.set(contentPath, params.content, function(err, reply) {
@@ -79,49 +79,53 @@ exports.createUser = function(req, res) {
 	var params = req.body;
 	//checking user existence
 	var userNamespace = "user:" + params.login
-	client.set(userNamespace, params.key, function(err, reply) {
-		if(!reply) {
-			res.send({
-				status: "error"
-			});
-		} else {
-			res.send({
-				status: "userCreated"
-			});
-		}
-	})
-};
 
-exports.load = function(req, res) {
-	var params = req.body;
-	//checking user existence
-	var userNamespace = "user:" + params.login
 	client.get(userNamespace, function(err, reply) {
-		if(!reply) {
-			res.send({
-				status: "userDontExist"
-			});
-		} else {
-			if(reply != params.key){
+		client.set(userNamespace, params.key, function(err, reply) {
+			if(!reply) {
 				res.send({
+					status: "error"
+				});
+			} else {
+				res.send({
+					status: "userCreated"
+				});
+			}
+		})
+	});
+
+	};
+
+	exports.load = function(req, res) {
+		var params = req.body;
+		//checking user existence
+		var userNamespace = "user:" + params.login
+		client.get(userNamespace, function(err, reply) {
+			if(!reply) {
+				res.send({
+					status: "userDontExist"
+				});
+			} else {
+				if(reply != params.key) {
+					res.send({
 						status: "refused"
 					});
-			}
-			var contentPath = userNamespace + ":" +params.path
-			console.log(params.path)
-			client.get(contentPath, function(err, reply) {
-				if(reply) {
-					res.send({
-						status: "loaded",
-						content: reply
-					});
-				} else {
-					res.send({
-						status: "pathDontExist"
-					});
 				}
-			})
+				var contentPath = userNamespace + ":" + params.path
+				console.log(params.path)
+				client.get(contentPath, function(err, reply) {
+					if(reply) {
+						res.send({
+							status: "loaded",
+							content: reply
+						});
+					} else {
+						res.send({
+							status: "pathDontExist"
+						});
+					}
+				})
 
-		}
-	})
-};
+			}
+		})
+	};
