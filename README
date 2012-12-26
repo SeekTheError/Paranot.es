@@ -3,6 +3,6 @@ need nodejs and npm
 then node app.js
 
 TODO
-LocalStorage
-ServerSide
+LocalStorage (maybe not)
+ServerSide (express + redis + socket.io)
 Interface
