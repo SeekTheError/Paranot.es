@@ -64,7 +64,7 @@ var pn = function($, CryptoJS) {
 			})
 
 
-			
+
 		}
 
 		function displayContent(source) {
@@ -76,7 +76,9 @@ var pn = function($, CryptoJS) {
 				console.log("Loaded");
 			}
 		}
-
+		/*
+		* Method to save the note on the current path on the server
+		*/
 		function save() {
 			console.log("saving")
 			var input = $("#input").html();
@@ -108,6 +110,10 @@ var pn = function($, CryptoJS) {
 			})
 
 		}
+		/*
+		 * This method is called on user connection
+		 * If the user don't exist and the username is free, then the new user will have the possibility to create a new account
+		 */
 
 		function checkUser() {
 			console.log("checking user");
@@ -163,10 +169,6 @@ var pn = function($, CryptoJS) {
 			})
 		}
 		//Implement create path
-		//extract the load and save method to server
-		//define unicity: key? username? etc...
-		//unicity on login
-		//client side key on sha(login+key)
 
 		function dispatch(response) {
 			console.log(response);
@@ -183,14 +185,15 @@ var pn = function($, CryptoJS) {
 			if(response.status == "userCreated") {
 				//saving the new content on user created 
 				console.log("userCreated");
+				load();
 			}
-			if(response.status == "pathDontExist"){
+			if(response.status == "pathDontExist") {
 				var create = window.confirm("This file does not exist, do you want to create it?")
 				if(create) {
 					save()
 				}
 			}
-			if(response.status == "loaded"){
+			if(response.status == "loaded") {
 				displayContent(response.content)
 			}
 

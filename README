@@ -1,8 +1,9 @@
-To install:
-need nodejs and npm
-then node app.js
+Paranot.es is an application that allow user to manage their note in a "safe" way,
+By safe, I mean that the notes are encrypted on the client side, so the decrypted version never transit on the network
+The encryption method use aes, and the key is the user password. This password does not transit directly on the network either
 
-TODO
-LocalStorage (maybe not)
-ServerSide (express + redis + socket.io)
-Interface
+To install:
+you need nodejs, npm and the redis server to run the application
+once it's install , simply use  node app.js and open your browser on "localhost:3000"
+
+
