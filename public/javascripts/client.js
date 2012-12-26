@@ -4,7 +4,6 @@ s = encrypted.toString()
 var decrypted = CryptoJS.AES.decrypt(s, "Secret Passphrase");
 r = CryptoJS.enc.Utf8.stringify(decrypted);
 //console.log(r);
-
 /**
 * login : the user login
   pass : the user pass, used for aes encryption
@@ -16,9 +15,9 @@ var pn = function($, CryptoJS) {
 		if(!$ || !CryptoJS) {
 			console.error("Missing Dependencies");
 		}
-		
+
 		this.init = function() {
-			$("#login,#pass,#path").change(function() {
+			$("#pass,#path").change(function() {
 				load()
 			});
 			//autosave before changing account or doc
@@ -40,7 +39,6 @@ var pn = function($, CryptoJS) {
 
 		}
 		//TODO use login+key as sha1 to avoid transmission of the encrypted key and thirdpart overidding
-
 
 		function load() {
 			console.log("loading");
@@ -70,16 +68,33 @@ var pn = function($, CryptoJS) {
 				return false;
 			}
 			var path = $("#path").val();
-			var result = CryptoJS.AES.encrypt(input, pass).toString();
+			var content = CryptoJS.AES.encrypt(input, pass).toString();
 			var key = CryptoJS.SHA1(login + pass).toString();
-			if(!Store[key]) {
-				Store[key] = [];
+			
+			var url = "/save";
+			var data={
+				login: encodeURIComponent(login),
+				key: encodeURIComponent(key),
+				path: encodeURIComponent(path),
+				content: content
 			}
-			Store[key][path] = result
-			console.log("Saved");
-			console.log(Store);
+			console.log("saving on"+url)
+			$.ajax({
+				url: url,
+				type: 'POST',
+				data: data
+			}).done(function(data){console.log(data)})
+			
+			//Store[key][path] = result
+			//console.log("Saved");
+			//console.log(Store);
 		}
 
+		//Implement create path
+		//extract the load and save method to server
+		//define unicity: key? username? etc...
+		//unicity on login
+		//client side key on sha(login+key)
 
 		return this;
 
