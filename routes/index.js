@@ -63,8 +63,16 @@ exports.checkUser = function(req, res) {
 			});
 		} else {
 			if(reply == params.key) {
-				res.send({
-					status: "userExist"
+				pathsNamespace=userNamespace+":*"
+				client.keys(pathsNamespace,function(err,reply){
+					var paths=reply;
+					for (var i = paths.length - 1; i >= 0; i--) {
+						paths[i]=paths[i].substring(pathsNamespace.length-1)
+					};
+					res.send({
+					status: "userExist",
+					paths: paths
+				});
 				});
 			} else {
 				res.send({
@@ -94,38 +102,39 @@ exports.createUser = function(req, res) {
 		})
 	});
 
-	};
+};
 
-	exports.load = function(req, res) {
-		var params = req.body;
-		//checking user existence
-		var userNamespace = "user:" + params.login
-		client.get(userNamespace, function(err, reply) {
-			if(!reply) {
+exports.load = function(req, res) {
+	var params = req.body;
+	//checking user existence
+	var userNamespace = "user:" + params.login
+	client.get(userNamespace, function(err, reply) {
+		if(!reply) {
+			res.send({
+				status: "userDontExist"
+			});
+		} else {
+			if(reply != params.key) {
 				res.send({
-					status: "userDontExist"
+					status: "refused"
 				});
-			} else {
-				if(reply != params.key) {
+			}
+			var contentPath = userNamespace + ":" + params.path
+			console.log(params.path)
+			client.get(contentPath, function(err, reply) {
+				if(reply) {
 					res.send({
-						status: "refused"
+						status: "loaded",
+						content: reply,
+						path: params.path
+					});
+				} else {
+					res.send({
+						status: "pathDontExist"
 					});
 				}
-				var contentPath = userNamespace + ":" + params.path
-				console.log(params.path)
-				client.get(contentPath, function(err, reply) {
-					if(reply) {
-						res.send({
-							status: "loaded",
-							content: reply
-						});
-					} else {
-						res.send({
-							status: "pathDontExist"
-						});
-					}
-				})
+			})
 
-			}
-		})
-	};
+		}
+	})
+};

@@ -23,11 +23,11 @@ var pn = function($, CryptoJS) {
 				load()
 			});
 			//autosave before changing account or doc
-			$("#input").focusout(function(event) {
+			$(".input").focusout(function(event) {
 				save();
 			})
 			//handle ctrl+s
-			$("#input").keypress(function(event) {
+			$(".input").keypress(function(event) {
 				if(!(event.which == 115 && event.ctrlKey) && !(event.which == 19)) {
 					return true;
 				} else {
@@ -77,8 +77,9 @@ var pn = function($, CryptoJS) {
 			}
 		}
 		/*
-		* Method to save the note on the current path on the server
-		*/
+		 * Method to save the note on the current path on the server
+		 */
+
 		function save() {
 			console.log("saving")
 			var input = $("#input").html();
