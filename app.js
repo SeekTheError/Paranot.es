@@ -9,8 +9,10 @@ var express = require('express'),
 
 var app = express();
 
+port=process.argv[2];
+
 app.configure(function() {
-  app.set('port', process.env.PORT || 3000);
+  app.set('port', port || 3000);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'ejs');
   app.use(express.favicon());
