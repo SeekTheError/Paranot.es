@@ -219,13 +219,15 @@ var pn = function($, CryptoJS) {
 			})
 		}
 
-
+		/*
+		*load or reload the tabs
+		*/
 		function initUserInterface(tabs) {
-			$("#inputs-navs").html("")
+			$("#inputs-navs").html("");
 			var nav;
 			var tab;
 			var empty = true;
-			for(var i = tabs.length - 1; i >= 0; i--) {
+			for(var i = 0; i < tabs.length;i++ ) {
 				var nav = $('<li>').html('<a class="file" href="#' + decodeURIComponent(tabs[i]) + '" data-toggle="tab">' + decodeURIComponent(tabs[i]) + '</a>')
 				if(empty) {
 					$(nav).addClass("active").attr("");

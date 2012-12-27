@@ -10,3 +10,7 @@ a {
 #pass,#login,#path {margin-top: 8px;}
 
 #top-nav{width:100%;}
+
+#addNewFile:hover{
+	cursor: pointer;
+}
