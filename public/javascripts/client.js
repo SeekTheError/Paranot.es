@@ -120,14 +120,18 @@ var pn = function($, CryptoJS) {
 		 * TODO : Split save and create file
 		 */
 
-		function save(path) {
+		function save() {
 			console.log("saving")
 			var input = $("#input").html();
 			var login = $("#login").val();
 			var pass = $("#pass").val();
-			if(typeof path == 'undefined') {
-				var path = $("#inputs-navs li.active a").html();
+			var path = $("#input").data('path');
+			//TODO check if this bug is gone!!!
+			if(!path){
+				console.log("abort, cause: no path");
+				return;
 			}
+			
 			//prevent useless save on the welcome page
 			if(login == "" || pass == "") {
 				console.log("abort")
@@ -181,12 +185,11 @@ var pn = function($, CryptoJS) {
 
 
 		function deleteFile() {
-			c
 			$("#input").html("");
 			var login = $("#login").val();
 			var pass = $("#pass").val();
 			var path = $("#input").data('path');
-			onsole.log("deleting file: " + path);
+			console.log("deleting file: " + path);
 			var key = CryptoJS.SHA1(login + pass).toString();
 
 			var url = "/deleteFile";
@@ -333,6 +336,7 @@ var pn = function($, CryptoJS) {
 				checkUser();
 			}
 			if(response.status == "fileDeleted") {
+				$("#input").data('path',null);
 				checkUser();
 			}
 
