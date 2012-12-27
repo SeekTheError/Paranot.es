@@ -41,7 +41,11 @@ var pn = function($, CryptoJS) {
 			});
 
 			$("#addNewFile").live("click", function(event) {
+				if($('#newFileName i').length > 0 ){
+						$('#newFileName').html("").focus();
+				}else{
 				createFile($('#newFileName').html());
+				}
 			})
 
 			//handle ctrl+s
