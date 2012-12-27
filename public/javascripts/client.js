@@ -42,7 +42,7 @@ var pn = function($, CryptoJS) {
 				$('#newFileName').html("");
 			});
 			$("#newFileName").live('keypress', function(event) {
-				console.log(event)
+				//console.log(event)
 				if(!(event.which == 13)) {
 					return true;
 				} else {
@@ -181,11 +181,12 @@ var pn = function($, CryptoJS) {
 
 
 		function deleteFile() {
-			console.log("deleting file: " + path)
+			c
 			$("#input").html("");
 			var login = $("#login").val();
 			var pass = $("#pass").val();
-			var path = $("#input").data('path')
+			var path = $("#input").data('path');
+			onsole.log("deleting file: " + path);
 			var key = CryptoJS.SHA1(login + pass).toString();
 
 			var url = "/deleteFile";
