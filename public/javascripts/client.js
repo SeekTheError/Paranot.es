@@ -57,7 +57,7 @@ var pn = function($, CryptoJS) {
 
 
 		}
-		//TODO use login+key as sha1 to avoid transmission of the encrypted key and thirdpart overidding
+
 
 		function load(path) {
 			$("#input").html("");
@@ -228,7 +228,8 @@ var pn = function($, CryptoJS) {
 			var tab;
 			var empty = true;
 			for(var i = 0; i < tabs.length;i++ ) {
-				var nav = $('<li>').html('<a class="file" href="#' + decodeURIComponent(tabs[i]) + '" data-toggle="tab">' + decodeURIComponent(tabs[i]) + '</a>')
+				//var nav = $('<li>').html('<a class="file" href="#' + decodeURIComponent(tabs[i]) + '" data-toggle="tab">' + decodeURIComponent(tabs[i]) + '</a>')
+				var nav = $('<li>').html('<a class="file" href="#" data-toggle="tab">' + decodeURIComponent(tabs[i]) + '</a>')
 				if(empty) {
 					$(nav).addClass("active").attr("");
 					empty = false;
