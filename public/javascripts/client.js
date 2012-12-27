@@ -17,19 +17,31 @@ var pn = function($, CryptoJS) {
 
 		this.init = function() {
 			$("#inputs-navs li a.file").live('click', function(event) {
+				a = event;
 				load()
+
 			})
+
+			$('#deleteFile').live("click",function(){
+				var toDelete=window.confirm("Are you sure that you want to delete this file");
+				if(toDelete){
+					deleteFile();
+				}
+			});
+
 			$("#pass").change(function() {
+				$("#inputs-navs").html("");
+				$("#input").html("");
 				checkUser()
 			});
 			//autosave before changing account or doc
 			$("#input").focusout(function(event) {
 				save();
 			})
-			$('#newFileName').live("click",function(event){
+			$('#newFileName').live("click", function(event) {
 				$('#newFileName').html("");
 			});
-			$("#newFileName").live('keypress',function(event) {
+			$("#newFileName").live('keypress', function(event) {
 				console.log(event)
 				if(!(event.which == 13)) {
 					return true;
@@ -41,10 +53,10 @@ var pn = function($, CryptoJS) {
 			});
 
 			$("#addNewFile").live("click", function(event) {
-				if($('#newFileName i').length > 0 ){
-						$('#newFileName').html("").focus();
-				}else{
-				createFile($('#newFileName').html());
+				if($('#newFileName i').length > 0) {
+					$('#newFileName').html("").focus();
+				} else {
+					createFile($('#newFileName').html());
 				}
 			})
 
@@ -58,21 +70,21 @@ var pn = function($, CryptoJS) {
 					return false;
 				}
 			});
-
-
 		}
 
-
-		function load(path) {
+		function load() {
 			$("#input").html("");
 			var login = $("#login").val();
 			var pass = $("#pass").val();
+			var path = $("#inputs-navs li.active a.file").html();
 			if(typeof path == "undefined") {
-				var path = $("#inputs-navs li.active a").html();
+				console.log("aborting, cause: nothing to load")
 			}
-			console.log("loading path: " + path);
+
+
 			var key = CryptoJS.SHA1(login + pass).toString();
 			var url = "load";
+			console.log(path)
 			var data = {
 				login: encodeURIComponent(login),
 				key: encodeURIComponent(key),
@@ -91,8 +103,11 @@ var pn = function($, CryptoJS) {
 
 		}
 
-		function displayContent(source) {
-			if(source) {
+		function displayContent(response) {
+			if(response) {
+				$("#input").data('path',response.path);
+				console.log("displaying: " + response.path);
+				var source = response.content
 				var pass = $("#pass").val();
 				var raw = CryptoJS.AES.decrypt(source, pass);
 				var result = CryptoJS.enc.Utf8.stringify(raw);
@@ -112,8 +127,6 @@ var pn = function($, CryptoJS) {
 			var pass = $("#pass").val();
 			if(typeof path == 'undefined') {
 				var path = $("#inputs-navs li.active a").html();
-			} else {
-				var input = "  ";
 			}
 			//prevent useless save on the welcome page
 			if(login == "" || pass == "") {
@@ -165,6 +178,33 @@ var pn = function($, CryptoJS) {
 			})
 
 		}
+
+
+		function deleteFile() {
+			console.log("deleting file: " + path)
+			$("#input").html("");
+			var login = $("#login").val();
+			var pass = $("#pass").val();
+			var path = $("#input").data('path')
+			var key = CryptoJS.SHA1(login + pass).toString();
+
+			var url = "/deleteFile";
+			var data = {
+				login: encodeURIComponent(login),
+				key: encodeURIComponent(key),
+				path: encodeURIComponent(path),
+			}
+			$.ajax({
+				url: url,
+				type: 'POST',
+				data: data
+			}).done(function(data) {
+				dispatch(data);
+			})
+
+		}
+
+
 		/*
 		 * This method is called on user connection
 		 * If the user don't exist and the username is free, then the new user will have the possibility to create a new account
@@ -224,14 +264,15 @@ var pn = function($, CryptoJS) {
 		}
 
 		/*
-		*load or reload the tabs
-		*/
+		 *load or reload the tabs
+		 */
+
 		function initUserInterface(tabs) {
 			$("#inputs-navs").html("");
 			var nav;
 			var tab;
 			var empty = true;
-			for(var i = 0; i < tabs.length;i++ ) {
+			for(var i = 0; i < tabs.length; i++) {
 				//var nav = $('<li>').html('<a class="file" href="#' + decodeURIComponent(tabs[i]) + '" data-toggle="tab">' + decodeURIComponent(tabs[i]) + '</a>')
 				var nav = $('<li>').html('<a class="file" href="#" data-toggle="tab">' + decodeURIComponent(tabs[i]) + '</a>')
 				if(empty) {
@@ -241,15 +282,19 @@ var pn = function($, CryptoJS) {
 				$("#inputs-navs").append(nav);
 			};
 			//create the add file tab
-			var addNav = $('<li>').html('<a id="newFileName" contenteditable="true"><i>New Note</i></a>');
+			var addNav = $('<li>').html('<a id="deleteFile"><i class="icon-trash"></i></a>').addClass('command');
 			$("#inputs-navs").append(addNav);
-			var addNav = $('<li>').html('<a id="addNewFile">+</a>');
+			var addNav = $('<li>').html('<a id="addNewFile">+</a>').addClass('command');
 			$("#inputs-navs").append(addNav);
+			var addNav = $('<li>').html('<a id="newFileName" contenteditable="true"><i>New Note</i></a>').addClass('command');
+			$("#inputs-navs").append(addNav);
+			if(!empty){
 			load()
+		}
 		}
 
 		function dispatch(response) {
-			console.log(response);
+			console.log("dispatcher: ",response);
 			if(response.status == "userDontExist") {
 				var create = window.confirm("This account does not exist, do you want to create it?")
 				if(create) {
@@ -259,7 +304,6 @@ var pn = function($, CryptoJS) {
 			if(response.status == "userExist") {
 				console.log("User Exist");
 				initUserInterface(response.paths);
-
 			}
 			if(response.status == "fileCreated") {
 				console.log("File successfully created");
@@ -274,13 +318,11 @@ var pn = function($, CryptoJS) {
 				checkUser();
 			}
 			if(response.status == "pathDontExist") {
-				var createNew = window.confirm("This file does not exist, do you want to create it?")
-				if(createNew) {
-					createFile($("#newFileName").html())
-				}
+				console.log(response);
+				
 			}
 			if(response.status == "loaded") {
-				displayContent(response.content)
+				displayContent(response)
 			}
 			if(response.status == "invalidPassword") {
 				window.alert("Invalid Password")
@@ -289,7 +331,10 @@ var pn = function($, CryptoJS) {
 				window.alert("Invalid FileName");
 				checkUser();
 			}
-			
+			if(response.status == "fileDeleted") {
+				checkUser();
+			}
+
 
 		}
 

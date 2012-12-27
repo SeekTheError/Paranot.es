@@ -98,6 +98,52 @@ exports.createFile = function(req, res) {
 	})
 };
 
+exports.deleteFile = function(req, res) {
+	var params = req.body;
+	//checking user existence
+	var userNamespace = "user:" + params.login
+	if(params.path == "") {
+		res.send({
+			status: "invalidFileName"
+		});
+		return;
+	}
+	client.get(userNamespace, function(err, reply) {
+		if(!reply) {
+			res.send({
+				status: "userDontExist"
+			});
+		} else {
+			if(reply != params.key) {
+				res.send({
+					status: "refused"
+				});
+			}
+			var contentPath = userNamespace + ":" + params.path
+
+			client.get(contentPath, function(err, reply) {
+				if(reply) {
+					client.del(contentPath, function(err, reply) {
+						if(reply) {
+							res.send({
+								status: "fileDeleted"
+							});
+						} else {
+							res.send({
+								status: "error"
+							});
+						}
+					});
+				} else {
+					res.send({
+						status: "deleteFileDontExist"
+					});
+
+				}
+			});
+		}
+	})
+};
 
 exports.checkUser = function(req, res) {
 	var params = req.body;
