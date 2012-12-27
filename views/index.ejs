@@ -20,7 +20,7 @@
 <script>	
 	$(document).ready(function() {
 		// IE "console"
-		if (!window.console) {
+		if (!window.console || !console) {
 			window.console = {};
 			window.console.log = function() {}
 			window.console.error = function(){}
@@ -80,10 +80,6 @@
       This website is open source, you can check the code at https://github.com/SeekTheError/Paranot.es
   </div>
 
- 
-<script>
-  
-</script>
   </div>
 </body>
 </html>

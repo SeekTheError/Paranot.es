@@ -111,7 +111,7 @@ var pn = function($, CryptoJS) {
 				var pass = $("#pass").val();
 				var raw = CryptoJS.AES.decrypt(source, pass);
 				var result = CryptoJS.enc.Utf8.stringify(raw);
-				$("#input").html(result.toString());
+				document.getElementById('input').textContent=result.toString();
 				console.log("Loaded");
 			}
 		}
@@ -122,7 +122,7 @@ var pn = function($, CryptoJS) {
 
 		function save() {
 			console.log("saving")
-			var input = $("#input").html();
+			var input = document.getElementById('input').textContent
 			var login = $("#login").val();
 			var pass = $("#pass").val();
 			var path = $("#input").data('path');
