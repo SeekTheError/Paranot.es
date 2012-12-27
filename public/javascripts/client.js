@@ -16,6 +16,8 @@ var pn = function($, CryptoJS) {
 		}
 
 		this.init = function() {
+			$("#inputs-navs li a").live('click',function(event){load()})
+
 			$("#pass").change(function() {
 				checkUser()
 			});
@@ -23,11 +25,11 @@ var pn = function($, CryptoJS) {
 				load()
 			});
 			//autosave before changing account or doc
-			$(".input").focusout(function(event) {
+			$("#input").focusout(function(event) {
 				save();
 			})
 			//handle ctrl+s
-			$(".input").keypress(function(event) {
+			$("#input").keypress(function(event) {
 				if(!(event.which == 115 && event.ctrlKey) && !(event.which == 19)) {
 					return true;
 				} else {
@@ -42,11 +44,12 @@ var pn = function($, CryptoJS) {
 		//TODO use login+key as sha1 to avoid transmission of the encrypted key and thirdpart overidding
 
 		function load() {
-			console.log("loading");
+			
 			$("#input").html("");
 			var login = $("#login").val();
 			var pass = $("#pass").val();
-			var path = $("#path").val();
+			var path=$("#inputs-navs li.active a").html();
+			console.log("loading path: "+path);
 			var key = CryptoJS.SHA1(login + pass).toString();
 			var url = "load";
 			var data = {
@@ -85,12 +88,12 @@ var pn = function($, CryptoJS) {
 			var input = $("#input").html();
 			var login = $("#login").val();
 			var pass = $("#pass").val();
+			var path=$("#inputs-navs li.active a").html();
 			//prevent useless save on the welcome page
 			if(login == "" || pass == "") {
 				console.log("abort")
 				return false;
 			}
-			var path = $("#path").val();
 			var content = CryptoJS.AES.encrypt(input, pass).toString();
 			var key = CryptoJS.SHA1(login + pass).toString();
 
@@ -145,7 +148,6 @@ var pn = function($, CryptoJS) {
 
 		function createUser() {
 			console.log("creating user");
-			var input = $("#input").html();
 			var login = $("#login").val();
 			var pass = $("#pass").val();
 			//prevent useless save on the welcome page
@@ -160,7 +162,7 @@ var pn = function($, CryptoJS) {
 				login: encodeURIComponent(login),
 				key: encodeURIComponent(key)
 			}
-			console.log("saving on" + url)
+			console.log("creating user: " + url)
 			$.ajax({
 				url: url,
 				type: 'POST',
@@ -169,7 +171,23 @@ var pn = function($, CryptoJS) {
 				dispatch(data);
 			})
 		}
-		//Implement create path
+
+
+		function initUserInterface(tabs){
+			$("#inputs-navs").html("")
+			var nav;
+			var tab;
+			var empty=true;
+			for (var i = tabs.length - 1; i >= 0; i--) {
+					var nav=$('<li>').html('<a href="#'+tabs[i]+'" data-toggle="tab">'+tabs[i]+'</a>')
+					if(empty){
+						$(nav).addClass("active").attr("");
+						empty = false;
+					}
+					$("#inputs-navs").append(nav);
+			};
+			load()
+		}
 
 		function dispatch(response) {
 			console.log(response);
@@ -180,13 +198,14 @@ var pn = function($, CryptoJS) {
 				}
 			}
 			if(response.status == "userExist") {
-				console.log("User Exist")
-				load()
+				console.log("User Exist");
+				initUserInterface(response.paths);
+				
 			}
 			if(response.status == "userCreated") {
 				//saving the new content on user created 
 				console.log("userCreated");
-				load();
+				checkUser();
 			}
 			if(response.status == "pathDontExist") {
 				var create = window.confirm("This file does not exist, do you want to create it?")

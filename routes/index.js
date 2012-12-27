@@ -3,9 +3,7 @@
  */
 
 exports.index = function(req, res) {
-	res.render('index', {
-		title: 'Express'
-	});
+	res.render('index');
 };
 
 /*
@@ -63,16 +61,16 @@ exports.checkUser = function(req, res) {
 			});
 		} else {
 			if(reply == params.key) {
-				pathsNamespace=userNamespace+":*"
-				client.keys(pathsNamespace,function(err,reply){
-					var paths=reply;
-					for (var i = paths.length - 1; i >= 0; i--) {
-						paths[i]=paths[i].substring(pathsNamespace.length-1)
+				pathsNamespace = userNamespace + ":*"
+				client.keys(pathsNamespace, function(err, reply) {
+					var paths = reply;
+					for(var i = paths.length - 1; i >= 0; i--) {
+						paths[i] = paths[i].substring(pathsNamespace.length - 1)
 					};
 					res.send({
-					status: "userExist",
-					paths: paths
-				});
+						status: "userExist",
+						paths: paths
+					});
 				});
 			} else {
 				res.send({
@@ -87,7 +85,6 @@ exports.createUser = function(req, res) {
 	var params = req.body;
 	//checking user existence
 	var userNamespace = "user:" + params.login
-
 	client.get(userNamespace, function(err, reply) {
 		client.set(userNamespace, params.key, function(err, reply) {
 			if(!reply) {
@@ -95,13 +92,18 @@ exports.createUser = function(req, res) {
 					status: "error"
 				});
 			} else {
-				res.send({
-					status: "userCreated"
+				var homeNameSpace = userNamespace + ":Home";
+				console.log("creating home: "+homeNameSpace);
+				client.set(homeNameSpace,"x", function(err, reply) {
+					console.log("home creation response: "+reply)
+					res.send({
+						status: "userCreated",
+					});
 				});
+
 			}
 		})
 	});
-
 };
 
 exports.load = function(req, res) {
@@ -120,7 +122,7 @@ exports.load = function(req, res) {
 				});
 			}
 			var contentPath = userNamespace + ":" + params.path
-			console.log(params.path)
+			console.log("loading path:"+contentPath)
 			client.get(contentPath, function(err, reply) {
 				if(reply) {
 					res.send({

@@ -52,25 +52,25 @@
               </li>
               <li>
               	<input id="pass" type="password" placeholder="Password"/>
-              </li>
+              </li><!--
                <li>
               	<select id="path" placeholder="Path">
               		<option value="">/</option>
                   <option value="Other">Other</option>
               	</select>
-              </li>
+              </li>-->
             </ul>
           </div>
         </div>
       </div>
     </div>
     <div class="content">
-<ul class="nav nav-tabs">
+<ul id="inputs-navs" class="nav nav-tabs">
   <li class="active"><a href="#welcome" data-toggle="tab">Welcome!</a></li>
 </ul>
  
-<div class="tab-content">
-  <div class="tab-pane active input" id="welcome" contenteditable="true">
+
+  <div id="input" contenteditable="true">
       To start, enter a login and a password, and if the username is free, you will be able to create an account(paths are static for now)<br/>
 
       You can edit any note by simply clicking it<br/>
@@ -83,7 +83,7 @@
 
       That mean one thing: if you loose your password, you loose your account and thus your files, so keep it safe<br/>
   </div>
-</div>
+
  
 <script>
   
