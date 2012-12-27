@@ -16,7 +16,7 @@ var pn = function($, CryptoJS) {
 		}
 
 		this.init = function() {
-			$("#inputs-navs li a").live('click',function(event){load()})
+			$("#inputs-navs li a.file").live('click',function(event){load()})
 
 			$("#pass").change(function() {
 				checkUser()
@@ -28,6 +28,10 @@ var pn = function($, CryptoJS) {
 			$("#input").focusout(function(event) {
 				save();
 			})
+			$("#addNewFile").live("click",function(event) {
+				createFile($('#newFileName').html());
+			})
+
 			//handle ctrl+s
 			$("#input").keypress(function(event) {
 				if(!(event.which == 115 && event.ctrlKey) && !(event.which == 19)) {
@@ -43,12 +47,13 @@ var pn = function($, CryptoJS) {
 		}
 		//TODO use login+key as sha1 to avoid transmission of the encrypted key and thirdpart overidding
 
-		function load() {
-			
+		function load(path) {
 			$("#input").html("");
 			var login = $("#login").val();
 			var pass = $("#pass").val();
-			var path=$("#inputs-navs li.active a").html();
+			if(typeof path == "undefined"){
+				var path=$("#inputs-navs li.active a").html();
+			}
 			console.log("loading path: "+path);
 			var key = CryptoJS.SHA1(login + pass).toString();
 			var url = "load";
@@ -81,14 +86,19 @@ var pn = function($, CryptoJS) {
 		}
 		/*
 		 * Method to save the note on the current path on the server
+		  * TODO : Split save and create file
 		 */
 
-		function save() {
+		function save(path) {
 			console.log("saving")
 			var input = $("#input").html();
 			var login = $("#login").val();
 			var pass = $("#pass").val();
-			var path=$("#inputs-navs li.active a").html();
+			if(typeof path == 'undefined'){
+				var path=$("#inputs-navs li.active a").html();
+			} else {
+				var input="  ";
+			}
 			//prevent useless save on the welcome page
 			if(login == "" || pass == "") {
 				console.log("abort")
@@ -105,6 +115,30 @@ var pn = function($, CryptoJS) {
 				content: content
 			}
 			console.log("saving on" + url)
+			$.ajax({
+				url: url,
+				type: 'POST',
+				data: data
+			}).done(function(data) {
+				dispatch(data);
+			})
+
+		}
+		function createFile(path) {
+			console.log("creating new file: "+path)
+			var input = $("#input").html();
+			var login = $("#login").val();
+			var pass = $("#pass").val();
+
+			var content = CryptoJS.AES.encrypt(input, pass).toString();
+			var key = CryptoJS.SHA1(login + pass).toString();
+
+			var url = "/createFile";
+			var data = {
+				login: encodeURIComponent(login),
+				key: encodeURIComponent(key),
+				path: encodeURIComponent(path),
+			}
 			$.ajax({
 				url: url,
 				type: 'POST',
@@ -179,13 +213,18 @@ var pn = function($, CryptoJS) {
 			var tab;
 			var empty=true;
 			for (var i = tabs.length - 1; i >= 0; i--) {
-					var nav=$('<li>').html('<a href="#'+tabs[i]+'" data-toggle="tab">'+tabs[i]+'</a>')
+					var nav=$('<li>').html('<a class="file" href="#'+decodeURIComponent(tabs[i])+'" data-toggle="tab">'+decodeURIComponent(tabs[i])+'</a>')
 					if(empty){
 						$(nav).addClass("active").attr("");
 						empty = false;
 					}
 					$("#inputs-navs").append(nav);
 			};
+			//create the add file tab
+			var addNav=$('<li>').html('<a id="newFileName" contenteditable="true">New Tab</a>');
+			$("#inputs-navs").append(addNav);
+			var addNav=$('<li>').html('<a id="addNewFile">+</a>');
+			$("#inputs-navs").append(addNav);
 			load()
 		}
 
@@ -202,15 +241,24 @@ var pn = function($, CryptoJS) {
 				initUserInterface(response.paths);
 				
 			}
+			if(response.status == "fileCreated") {
+				console.log("File successfully created");
+				checkUser()
+				
+			}
+			if(response.status == "fileAlreadyExist") {
+				window.alert("This File name is already taken")
+				
+			}
 			if(response.status == "userCreated") {
 				//saving the new content on user created 
 				console.log("userCreated");
 				checkUser();
 			}
 			if(response.status == "pathDontExist") {
-				var create = window.confirm("This file does not exist, do you want to create it?")
-				if(create) {
-					save()
+				var createNew = window.confirm("This file does not exist, do you want to create it?")
+				if(createNew) {
+					createFile($("#newFileName").html())
 				}
 			}
 			if(response.status == "loaded") {

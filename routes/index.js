@@ -45,10 +45,52 @@ exports.save = function(req, res) {
 					});
 				}
 			})
-
 		}
 	})
 };
+
+exports.createFile = function(req, res) {
+	var params = req.body;
+	//checking user existence
+	var userNamespace = "user:" + params.login
+	client.get(userNamespace, function(err, reply) {
+		if(!reply) {
+			res.send({
+				status: "userDontExist"
+			});
+		} else {
+			if(reply != params.key) {
+				res.send({
+					status: "refused"
+				});
+			}
+			var contentPath = userNamespace + ":" + params.path
+
+			client.get(contentPath, function(err, reply) {
+				if(!reply) {
+
+					client.set(contentPath, "x", function(err, reply) {
+						if(reply) {
+							res.send({
+								status: "fileCreated"
+							});
+						} else {
+							res.send({
+								status: "error"
+							});
+						}
+					});
+				} else {
+					res.send({
+						status: "fileAlreadyExist"
+					});
+
+				}
+			});
+		}
+	})
+};
+
 
 exports.checkUser = function(req, res) {
 	var params = req.body;
@@ -93,9 +135,9 @@ exports.createUser = function(req, res) {
 				});
 			} else {
 				var homeNameSpace = userNamespace + ":Home";
-				console.log("creating home: "+homeNameSpace);
-				client.set(homeNameSpace,"x", function(err, reply) {
-					console.log("home creation response: "+reply)
+				console.log("creating home: " + homeNameSpace);
+				client.set(homeNameSpace, "x", function(err, reply) {
+					console.log("home creation response: " + reply)
 					res.send({
 						status: "userCreated",
 					});
@@ -122,7 +164,7 @@ exports.load = function(req, res) {
 				});
 			}
 			var contentPath = userNamespace + ":" + params.path
-			console.log("loading path:"+contentPath)
+			console.log("loading path:" + contentPath)
 			client.get(contentPath, function(err, reply) {
 				if(reply) {
 					res.send({
