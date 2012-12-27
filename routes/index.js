@@ -17,7 +17,9 @@ client.on("error", function(err) {
 	console.log("Error " + err);
 });
 
-
+/**
+ *TODO : check that the file exist
+ */
 exports.save = function(req, res) {
 	var params = req.body;
 	//checking user existence
@@ -53,6 +55,11 @@ exports.createFile = function(req, res) {
 	var params = req.body;
 	//checking user existence
 	var userNamespace = "user:" + params.login
+	if(params.path == "") {
+		res.send({
+			status: "invalidFileName"
+		});
+	}
 	client.get(userNamespace, function(err, reply) {
 		if(!reply) {
 			res.send({
@@ -68,7 +75,6 @@ exports.createFile = function(req, res) {
 
 			client.get(contentPath, function(err, reply) {
 				if(!reply) {
-
 					client.set(contentPath, "x", function(err, reply) {
 						if(reply) {
 							res.send({

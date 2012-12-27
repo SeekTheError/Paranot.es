@@ -16,19 +16,31 @@ var pn = function($, CryptoJS) {
 		}
 
 		this.init = function() {
-			$("#inputs-navs li a.file").live('click',function(event){load()})
-
+			$("#inputs-navs li a.file").live('click', function(event) {
+				load()
+			})
 			$("#pass").change(function() {
 				checkUser()
-			});
-			$("#path").change(function() {
-				load()
 			});
 			//autosave before changing account or doc
 			$("#input").focusout(function(event) {
 				save();
 			})
-			$("#addNewFile").live("click",function(event) {
+			$('#newFileName').live("click",function(event){
+				$('#newFileName').html("");
+			});
+			$("#newFileName").live('keypress',function(event) {
+				console.log(event)
+				if(!(event.which == 13)) {
+					return true;
+				} else {
+					createFile($('#newFileName').html());
+					event.preventDefault();
+					return false;
+				}
+			});
+
+			$("#addNewFile").live("click", function(event) {
 				createFile($('#newFileName').html());
 			})
 
@@ -51,10 +63,10 @@ var pn = function($, CryptoJS) {
 			$("#input").html("");
 			var login = $("#login").val();
 			var pass = $("#pass").val();
-			if(typeof path == "undefined"){
-				var path=$("#inputs-navs li.active a").html();
+			if(typeof path == "undefined") {
+				var path = $("#inputs-navs li.active a").html();
 			}
-			console.log("loading path: "+path);
+			console.log("loading path: " + path);
 			var key = CryptoJS.SHA1(login + pass).toString();
 			var url = "load";
 			var data = {
@@ -86,7 +98,7 @@ var pn = function($, CryptoJS) {
 		}
 		/*
 		 * Method to save the note on the current path on the server
-		  * TODO : Split save and create file
+		 * TODO : Split save and create file
 		 */
 
 		function save(path) {
@@ -94,10 +106,10 @@ var pn = function($, CryptoJS) {
 			var input = $("#input").html();
 			var login = $("#login").val();
 			var pass = $("#pass").val();
-			if(typeof path == 'undefined'){
-				var path=$("#inputs-navs li.active a").html();
+			if(typeof path == 'undefined') {
+				var path = $("#inputs-navs li.active a").html();
 			} else {
-				var input="  ";
+				var input = "  ";
 			}
 			//prevent useless save on the welcome page
 			if(login == "" || pass == "") {
@@ -124,8 +136,9 @@ var pn = function($, CryptoJS) {
 			})
 
 		}
+
 		function createFile(path) {
-			console.log("creating new file: "+path)
+			console.log("creating new file: " + path)
 			var input = $("#input").html();
 			var login = $("#login").val();
 			var pass = $("#pass").val();
@@ -207,23 +220,23 @@ var pn = function($, CryptoJS) {
 		}
 
 
-		function initUserInterface(tabs){
+		function initUserInterface(tabs) {
 			$("#inputs-navs").html("")
 			var nav;
 			var tab;
-			var empty=true;
-			for (var i = tabs.length - 1; i >= 0; i--) {
-					var nav=$('<li>').html('<a class="file" href="#'+decodeURIComponent(tabs[i])+'" data-toggle="tab">'+decodeURIComponent(tabs[i])+'</a>')
-					if(empty){
-						$(nav).addClass("active").attr("");
-						empty = false;
-					}
-					$("#inputs-navs").append(nav);
+			var empty = true;
+			for(var i = tabs.length - 1; i >= 0; i--) {
+				var nav = $('<li>').html('<a class="file" href="#' + decodeURIComponent(tabs[i]) + '" data-toggle="tab">' + decodeURIComponent(tabs[i]) + '</a>')
+				if(empty) {
+					$(nav).addClass("active").attr("");
+					empty = false;
+				}
+				$("#inputs-navs").append(nav);
 			};
 			//create the add file tab
-			var addNav=$('<li>').html('<a id="newFileName" contenteditable="true">New Tab</a>');
+			var addNav = $('<li>').html('<a id="newFileName" contenteditable="true">New Tab</a>');
 			$("#inputs-navs").append(addNav);
-			var addNav=$('<li>').html('<a id="addNewFile">+</a>');
+			var addNav = $('<li>').html('<a id="addNewFile">+</a>');
 			$("#inputs-navs").append(addNav);
 			load()
 		}
@@ -239,16 +252,14 @@ var pn = function($, CryptoJS) {
 			if(response.status == "userExist") {
 				console.log("User Exist");
 				initUserInterface(response.paths);
-				
+
 			}
 			if(response.status == "fileCreated") {
 				console.log("File successfully created");
-				checkUser()
-				
+				checkUser();
 			}
 			if(response.status == "fileAlreadyExist") {
-				window.alert("This File name is already taken")
-				
+				window.alert("This File name is already taken");
 			}
 			if(response.status == "userCreated") {
 				//saving the new content on user created 
