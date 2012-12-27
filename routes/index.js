@@ -59,6 +59,7 @@ exports.createFile = function(req, res) {
 		res.send({
 			status: "invalidFileName"
 		});
+		return;
 	}
 	client.get(userNamespace, function(err, reply) {
 		if(!reply) {

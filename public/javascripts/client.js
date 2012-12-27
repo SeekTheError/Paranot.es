@@ -234,7 +234,7 @@ var pn = function($, CryptoJS) {
 				$("#inputs-navs").append(nav);
 			};
 			//create the add file tab
-			var addNav = $('<li>').html('<a id="newFileName" contenteditable="true">New Tab</a>');
+			var addNav = $('<li>').html('<a id="newFileName" contenteditable="true"><i>New Note</i></a>');
 			$("#inputs-navs").append(addNav);
 			var addNav = $('<li>').html('<a id="addNewFile">+</a>');
 			$("#inputs-navs").append(addNav);
@@ -275,6 +275,14 @@ var pn = function($, CryptoJS) {
 			if(response.status == "loaded") {
 				displayContent(response.content)
 			}
+			if(response.status == "invalidPassword") {
+				window.alert("Invalid Password")
+			}
+			if(response.status == "invalidFileName") {
+				window.alert("Invalid FileName");
+				checkUser();
+			}
+			
 
 		}
 
