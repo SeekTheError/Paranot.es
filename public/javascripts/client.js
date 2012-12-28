@@ -17,9 +17,9 @@ var pn = function($, CryptoJS) {
 
 		this.init = function() {
 			$("#inputs-navs li a.file").live('click', function(event) {
-				a = event;
-				load()
-
+				event.preventDefault();
+				load();
+				return false;
 			})
 
 			$('#deleteFile').live("click",function(){
@@ -42,7 +42,7 @@ var pn = function($, CryptoJS) {
 				$('#newFileName').html("");
 			});
 			$("#newFileName").live('keypress', function(event) {
-				//console.log(event)
+				console.log(event);
 				if(!(event.which == 13)) {
 					return true;
 				} else {
@@ -61,7 +61,10 @@ var pn = function($, CryptoJS) {
 			})
 
 			//handle ctrl+s
-			$("#input").keypress(function(event) {
+
+			$("#input").live('keypress',function(event) {
+				return true;
+				console.log(event);
 				if(!(event.which == 115 && event.ctrlKey) && !(event.which == 19)) {
 					return true;
 				} else {
@@ -73,7 +76,7 @@ var pn = function($, CryptoJS) {
 		}
 
 		function load() {
-			$("#input").html("");
+			document.getElementById('input').textContent=null;
 			var login = $("#login").val();
 			var pass = $("#pass").val();
 			var path = $("#inputs-navs li.active a.file").html();
@@ -110,7 +113,7 @@ var pn = function($, CryptoJS) {
 		function save() {
 
 			console.log("saving")
-			var input = document.getElementById('input').textContent
+			var input = document.getElementById('input').innerHTML;
 			var login = $("#login").val();
 			var pass = $("#pass").val();
 			var path = $("#input").data('path');
@@ -261,7 +264,7 @@ var pn = function($, CryptoJS) {
 				var raw = CryptoJS.AES.decrypt(source, pass);
 				var result = CryptoJS.enc.Utf8.stringify(raw);
 				var input=document.getElementById('input');
-				input.textContent=result.toString();
+				input.innerHTML=result.toString();
 				console.log("Loaded");
 				$("#input").focus()
 			}
@@ -276,10 +279,9 @@ var pn = function($, CryptoJS) {
 			var tab;
 			var empty = true;
 			for(var i = 0; i < tabs.length; i++) {
-				//var nav = $('<li>').html('<a class="file" href="#' + decodeURIComponent(tabs[i]) + '" data-toggle="tab">' + decodeURIComponent(tabs[i]) + '</a>')
 				var nav = $('<li>').html('<a class="file" href="#" data-toggle="tab">' + decodeURIComponent(tabs[i]) + '</a>')
 				if(empty) {
-					$(nav).addClass("active").attr("");
+					//$(nav).addClass("active");
 					empty = false;
 				}
 				$("#inputs-navs").append(nav);
@@ -292,7 +294,7 @@ var pn = function($, CryptoJS) {
 			var addNav = $('<li>').html('<a id="newFileName" contenteditable="true"><i>New Note</i></a>').addClass('command');
 			$("#inputs-navs").append(addNav);
 			if(!empty){
-			load()
+			//load()
 		}
 		}
 
@@ -321,8 +323,7 @@ var pn = function($, CryptoJS) {
 				checkUser();
 			}
 			if(response.status == "pathDontExist") {
-				console.log(response);
-				
+				console.log(response);			
 			}
 			if(response.status == "loaded") {
 				displayContent(response)
