@@ -136,8 +136,6 @@ var pn = function($, CryptoJS) {
 		 */
 
 		function save() {
-
-			
 			var input = document.getElementById('input').innerHTML;
 			var login = $("#login").val();
 			var pass = $("#pass").val();
@@ -234,7 +232,7 @@ var pn = function($, CryptoJS) {
 
 		function checkUser() {
 			console.log("checking user");
-			var input = $("#input").html();
+			$("#input").hide();
 			var login = $("#login").val();
 			var pass = $("#pass").val();
 			//prevent useless save on the welcome page
@@ -292,6 +290,7 @@ var pn = function($, CryptoJS) {
 				var source = response.content
 				var pass = $("#pass").val();
 				var raw = CryptoJS.AES.decrypt(source, pass);
+				$("#input").show();
 				var result = CryptoJS.enc.Utf8.stringify(raw);
 				var input=document.getElementById('input');
 				input.innerHTML=result.toString();

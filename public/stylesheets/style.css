@@ -8,10 +8,12 @@ a {
 
 #pass,#login,#path {margin-top: 8px;}
 
-.navbar{margin-bottom: 5px;}
+.navbar, .nav{
+	margin-top:5px;
+	margin-bottom: 0px;}
 
-#addNewFile:hover{
-	cursor: pointer;
+.nav-tabs{
+	border-bottom: none;
 }
 
 li.command{float:right;}
@@ -23,6 +25,17 @@ padding-left: 10px;
 }
 
 div#input{
-	margin: 4px;
+	padding-top: 5px;
+	padding-right: 10px;
+	padding-left: 10px;
+	margin-right: 10px;
+	margin-left: 10px;
+	border: 1px solid #CCC;
+
 }
 
+ #input:focus {
+outline-width: 0px;
+outline-style: dotted;
+outline-offset: 5px
+}
