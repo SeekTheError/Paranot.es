@@ -214,7 +214,7 @@ var pn = function($, CryptoJS) {
 			var data = {
 				login: encodeURIComponent(login),
 				key: encodeURIComponent(key),
-				path: encodeURIComponent(path),
+				path: path,
 			}
 			$.ajax({
 				url: url,

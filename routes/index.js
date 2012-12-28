@@ -43,6 +43,7 @@ exports.save = function(req, res) {
 					status: "refused"
 				});
 			}
+			//TODO : check that file exist before saving
 			var contentPath = userNamespace + ":" + params.path
 			client.set(contentPath, params.content, function(err, reply) {
 				if(reply) {
