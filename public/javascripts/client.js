@@ -47,7 +47,7 @@ var pn = function($, CryptoJS) {
 				if(toDelete){
 					deleteFile();
 				}
-				return false;
+				return false;	
 			});
 
 			$("#pass").change(function() {
@@ -178,7 +178,7 @@ var pn = function($, CryptoJS) {
 			//setting the path to display
 			this.nextPath=path;
 			console.log("creating new file: " + path);
-			$("newFileName").html("<i>New Note</i>")
+			$("#newFileName").html("<i>New Note</i>")
 			var input = $("#input").html();
 			var login = $("#login").val();
 			var pass = $("#pass").val();
