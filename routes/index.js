@@ -214,15 +214,15 @@ exports.checkUser = function(req, res) {
 exports.createUser = function(req, res) {
 	var params = req.body;
 	//checking user existence
-	var login=params.login
-	var key=params.key
+	var login=params.login;
+	var key=params.key;
 	if(login =="" || key == ""){
 		res.send({
 					status: "invalidCredentials"
 				});
 		return;
 	}
-	var userNamespace = "user:" + login
+	var userNamespace = "user:" + login;
 	client.get(userNamespace, function(err, reply) {
 		client.set(userNamespace, params.key, function(err, reply) {
 			if(!reply) {
@@ -247,7 +247,7 @@ exports.createUser = function(req, res) {
 exports.load = function(req, res) {
 	var params = req.body;
 	//checking user existence
-	var login=params.login
+	var login=params.login;
 	var key= params.key;
 	if(login =="" || key == ""){
 		res.send({
@@ -286,3 +286,5 @@ exports.load = function(req, res) {
 		}
 	})
 };
+
+
