@@ -22,6 +22,14 @@ client.on("error", function(err) {
  */
 exports.save = function(req, res) {
 	var params = req.body;
+	var login=params.login;
+	var key =params.key;
+	if(login == "" || key == ""){
+		res.send({
+					status: "invalidCredentials"
+				});
+		return;
+	}
 	//checking user existence
 	var userNamespace = "user:" + params.login
 	client.get(userNamespace, function(err, reply) {
@@ -53,6 +61,17 @@ exports.save = function(req, res) {
 
 exports.createFile = function(req, res) {
 	var params = req.body;
+
+	var login=params.login;
+	var key =params.key;
+	if(login == "" || key == ""){
+		res.send({
+					status: "invalidCredentials"
+				});
+		return;
+	}
+
+
 	//checking user existence
 	var userNamespace = "user:" + params.login
 	if(params.path == "") {
@@ -101,7 +120,17 @@ exports.createFile = function(req, res) {
 exports.deleteFile = function(req, res) {
 	var params = req.body;
 	//checking user existence
-	var userNamespace = "user:" + params.login
+
+	var login=params.login;
+	var key =params.key;
+	if(login == "" || key == ""){
+		res.send({
+					status: "invalidCredentials"
+				});
+		return;
+	}
+
+	var userNamespace = "user:" + login
 	if(params.path == "") {
 		res.send({
 			status: "invalidFileName"
@@ -120,7 +149,6 @@ exports.deleteFile = function(req, res) {
 				});
 			}
 			var contentPath = userNamespace + ":" + params.path
-
 			client.get(contentPath, function(err, reply) {
 				if(reply) {
 					client.del(contentPath, function(err, reply) {
@@ -138,7 +166,6 @@ exports.deleteFile = function(req, res) {
 					res.send({
 						status: "deleteFileDontExist"
 					});
-
 				}
 			});
 		}
@@ -148,7 +175,15 @@ exports.deleteFile = function(req, res) {
 exports.checkUser = function(req, res) {
 	var params = req.body;
 	//checking user existence
-	var userNamespace = "user:" + params.login
+	var login=params.login;
+	var key =params.key;
+	if(login == "" || key == ""){
+		res.send({
+					status: "invalidCredentials"
+				});
+		return;
+	}
+	var userNamespace = "user:" + login;
 	client.get(userNamespace, function(err, reply) {
 		if(!reply) {
 			res.send({
@@ -179,7 +214,15 @@ exports.checkUser = function(req, res) {
 exports.createUser = function(req, res) {
 	var params = req.body;
 	//checking user existence
-	var userNamespace = "user:" + params.login
+	var login=params.login
+	var key=params.key
+	if(login =="" || key == ""){
+		res.send({
+					status: "invalidCredentials"
+				});
+		return;
+	}
+	var userNamespace = "user:" + login
 	client.get(userNamespace, function(err, reply) {
 		client.set(userNamespace, params.key, function(err, reply) {
 			if(!reply) {
@@ -204,14 +247,22 @@ exports.createUser = function(req, res) {
 exports.load = function(req, res) {
 	var params = req.body;
 	//checking user existence
-	var userNamespace = "user:" + params.login
+	var login=params.login
+	var key= params.key;
+	if(login =="" || key == ""){
+		res.send({
+					status: "invalidCredentials"
+				});
+		return;
+	}
+	var userNamespace = "user:" + login
 	client.get(userNamespace, function(err, reply) {
 		if(!reply) {
 			res.send({
 				status: "userDontExist"
 			});
 		} else {
-			if(reply != params.key) {
+			if(reply != key) {
 				res.send({
 					status: "refused"
 				});

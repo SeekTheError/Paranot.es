@@ -16,6 +16,7 @@ var pn = function($, CryptoJS) {
 		}
 
 		this.init = function() {
+
 			$("#inputs-navs li a.file").live('click', function(event) {
 				event.preventDefault();
 				load();
@@ -299,7 +300,7 @@ var pn = function($, CryptoJS) {
 		}
 
 		function dispatch(response) {
-			//console.log("dispatcher: ",response);
+			console.log("dispatcher: ",response);
 			if(response.status == "userDontExist") {
 				var create = window.confirm("This account does not exist, do you want to create it?")
 				if(create) {
