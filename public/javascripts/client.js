@@ -262,8 +262,8 @@ var pn = function($, CryptoJS) {
 				var result = CryptoJS.enc.Utf8.stringify(raw);
 				var input=document.getElementById('input');
 				input.textContent=result.toString();
-				//input.textContent==""?input.textContent=" ":false;
 				console.log("Loaded");
+				$("#input").focus()
 			}
 		}
 		/*
