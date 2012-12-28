@@ -1,17 +1,15 @@
 TODO
-GLOBAL
 
 protect login from contening ":" > maybe not
 External audit of the global security
 https
 state on load/save
-global interface improvment
-	edition
-	incite on where to edit
+
+bug
 	cr bug on chrome
-logout button
-switch to modal instead of popups
-big files? chrome crash around 1-2 mo
+
+switch to modal instead of popups => not now
+big files? chrome crash around 2 mo => good enough
 
 branching:
 

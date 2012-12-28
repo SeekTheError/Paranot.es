@@ -106,7 +106,7 @@ var pn = function($, CryptoJS) {
 			document.getElementById('input').textContent=null;
 			var login = $("#login").val();
 			var pass = $("#pass").val();
-			var path = $("#inputs-navs li.active a.file").html();
+			var path = encodeURIComponent($("#inputs-navs li.active a.file").html());
 	
 			if(typeof path == "undefined") {
 				console.log("aborting, cause: nothing to load")
@@ -117,7 +117,7 @@ var pn = function($, CryptoJS) {
 			var data = {
 				login: encodeURIComponent(login),
 				key: encodeURIComponent(key),
-				path: encodeURIComponent(path),
+				path: path,
 			}
 			console.log("loading on" + url)
 			$.ajax({
@@ -137,11 +137,12 @@ var pn = function($, CryptoJS) {
 
 		function save() {
 
-			console.log("saving")
+			
 			var input = document.getElementById('input').innerHTML;
 			var login = $("#login").val();
 			var pass = $("#pass").val();
 			var path = $("#input").data('path');
+			console.log("saving:", path);
 			//TODO check if this bug is gone!!!
 			if(!path){
 				console.log("abort, cause: no path");
@@ -160,7 +161,7 @@ var pn = function($, CryptoJS) {
 			var data = {
 				login: encodeURIComponent(login),
 				key: encodeURIComponent(key),
-				path: encodeURIComponent(path),
+				path: path,
 				content: content
 			}
 			console.log("saving on" + url)
@@ -176,7 +177,7 @@ var pn = function($, CryptoJS) {
 
 		function createFile(path) {
 			//setting the path to display
-			this.nextPath=path;
+			this.nextPath=encodeURIComponent(path);
 			console.log("creating new file: " + path);
 			$("#newFileName").html("<i>New Note</i>")
 			var input = $("#input").html();
