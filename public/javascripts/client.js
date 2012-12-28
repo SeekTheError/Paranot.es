@@ -14,8 +14,22 @@ var pn = function($, CryptoJS) {
 		if(!$ || !CryptoJS) {
 			console.error("Missing Dependencies");
 		}
+		// this variable is used for two purpose:
+		//on file Creation to autodisplay the new file
+		// on reload to display the reloaded file
 
+		this.nextPath=null;
+		/*
+		* Event originated from the user interface
+		*/
 		this.init = function() {
+			$("#refresh").click(function(event){
+				event.preventDefault();
+				document.getElementById("input").innerHTML = "";
+				nextPath=$("#input").data("path");
+				checkUser();
+				return false;
+			})
 
 			$("#inputs-navs li a.file").live('click', function(event) {
 				event.preventDefault();
@@ -24,10 +38,16 @@ var pn = function($, CryptoJS) {
 			})
 
 			$('#deleteFile').live("click",function(){
-				var toDelete=window.confirm("Are you sure that you want to delete this file");
+				event.preventDefault();
+				var fileName=$("#input").data('path');
+				if(!fileName){
+					return;
+				}
+				var toDelete=window.confirm("Are you sure that you want to delete the file "+fileName);
 				if(toDelete){
 					deleteFile();
 				}
+				return false;
 			});
 
 			$("#pass").change(function() {
@@ -40,7 +60,9 @@ var pn = function($, CryptoJS) {
 				save();
 			})
 			$('#newFileName').live("click", function(event) {
+				event.preventDefault();
 				$('#newFileName').html("");
+				return false;
 			});
 			$("#newFileName").live('keypress', function(event) {
 				console.log(event);
@@ -54,11 +76,14 @@ var pn = function($, CryptoJS) {
 			});
 
 			$("#addNewFile").live("click", function(event) {
+				event.preventDefault();
 				if($('#newFileName i').length > 0) {
-					$('#newFileName').html("").focus();
+					$('#newFileName').html("");
+					$('#newFileName').focus();
 				} else {
 					createFile($('#newFileName').html());
 				}
+				return false;
 			})
 
 			//handle ctrl+s
@@ -74,12 +99,15 @@ var pn = function($, CryptoJS) {
 				}
 			});
 		}
-
-		function load() {
+		/*
+		* Path is used for autoloading purpose
+		*/
+		function load(askedPath) {
 			document.getElementById('input').textContent=null;
 			var login = $("#login").val();
 			var pass = $("#pass").val();
 			var path = $("#inputs-navs li.active a.file").html();
+	
 			if(typeof path == "undefined") {
 				console.log("aborting, cause: nothing to load")
 			}
@@ -104,7 +132,7 @@ var pn = function($, CryptoJS) {
 		
 		/*
 		 * Method to save the note on the current path on the server
-		 * TODO : Split save and create file
+
 		 */
 
 		function save() {
@@ -147,7 +175,10 @@ var pn = function($, CryptoJS) {
 		}
 
 		function createFile(path) {
-			console.log("creating new file: " + path)
+			//setting the path to display
+			this.nextPath=path;
+			console.log("creating new file: " + path);
+			$("newFileName").html("<i>New Note</i>")
 			var input = $("#input").html();
 			var login = $("#login").val();
 			var pass = $("#pass").val();
@@ -254,6 +285,7 @@ var pn = function($, CryptoJS) {
 		}
 		function displayContent(response) {
 			if(response) {
+				console.log("displaying",response)
 				$("#input").data('path',response.path);
 				console.log("displaying: " + response.path);
 				var source = response.content
@@ -279,18 +311,22 @@ var pn = function($, CryptoJS) {
 			var empty = true;
 			for(var i = 0; i < tabs.length; i++) {
 				var nav = $('<li>').html('<a class="file" href="#" data-toggle="tab">' + decodeURIComponent(tabs[i]) + '</a>')
-				if(empty) {
-					//$(nav).addClass("active");
+				if(this.nextPath == decodeURIComponent(tabs[i])) {
+					$(nav).addClass("active");
 					empty = false;
 				}
 				$("#inputs-navs").append(nav);
 			};
-			//Autoload ???
-			if(!empty){
-			//load()
+			//Autoload 
+			if(!empty && this.nextPath){
+			var path=this.nextPath;
+			this.nextPath=null;
+			load(path)
 		}
 		}
-
+		/*
+		*Event originated from a server response
+		*/
 		function dispatch(response) {
 			console.log("dispatcher: ",response);
 			if(response.status == "userDontExist") {

@@ -98,7 +98,8 @@ exports.createFile = function(req, res) {
 					client.set(contentPath, "x", function(err, reply) {
 						if(reply) {
 							res.send({
-								status: "fileCreated"
+								status: "fileCreated",
+								path: params.path
 							});
 						} else {
 							res.send({
