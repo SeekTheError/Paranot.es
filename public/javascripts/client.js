@@ -101,26 +101,14 @@ var pn = function($, CryptoJS) {
 
 		}
 
-		function displayContent(response) {
-			if(response) {
-				$("#input").data('path',response.path);
-				console.log("displaying: " + response.path);
-				var source = response.content
-				var pass = $("#pass").val();
-				var raw = CryptoJS.AES.decrypt(source, pass);
-				var result = CryptoJS.enc.Utf8.stringify(raw);
-				var input=document.getElementById('input');
-				input.textContent=result.toString();
-				input.textContent==""?input.textContent=" ":false;
-				console.log("Loaded");
-			}
-		}
+		
 		/*
 		 * Method to save the note on the current path on the server
 		 * TODO : Split save and create file
 		 */
 
 		function save() {
+
 			console.log("saving")
 			var input = document.getElementById('input').textContent
 			var login = $("#login").val();
@@ -264,7 +252,20 @@ var pn = function($, CryptoJS) {
 				dispatch(data);
 			})
 		}
-
+		function displayContent(response) {
+			if(response) {
+				$("#input").data('path',response.path);
+				console.log("displaying: " + response.path);
+				var source = response.content
+				var pass = $("#pass").val();
+				var raw = CryptoJS.AES.decrypt(source, pass);
+				var result = CryptoJS.enc.Utf8.stringify(raw);
+				var input=document.getElementById('input');
+				input.textContent=result.toString();
+				//input.textContent==""?input.textContent=" ":false;
+				console.log("Loaded");
+			}
+		}
 		/*
 		 *load or reload the tabs
 		 */
