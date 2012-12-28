@@ -1,11 +1,15 @@
 TODO
 
-Bug on concurrent editing overriding change
+state on load/save
+Bug on concurrent editing overriding change: "fixed", except form two browser if the focus stay on the browser that should update
 
 protect login from contening ":" > maybe not
 External audit of the global security
 https
-state on load/save
+
+
+autoload on create is broken
+conpat ipad
 
 bug
 	cr bug on chrome

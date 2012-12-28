@@ -77,7 +77,7 @@ var pn = function($, CryptoJS) {
 				return false;
 			});
 			$("#newFileName").live('keypress', function(event) {
-				console.log(event);
+				//console.log(event);
 				if(!(event.which == 13)) {
 					return true;
 				} else {
@@ -343,7 +343,7 @@ var pn = function($, CryptoJS) {
 		function dispatch(response) {
 			console.log("dispatcher: ",response);
 			if(response.status == "userDontExist") {
-				var create = window.confirm("This account does not exist, do you want to create it?")
+				var create = confirm("This account does not exist, do you want to create it?");
 				if(create) {
 					createUser()
 				}
