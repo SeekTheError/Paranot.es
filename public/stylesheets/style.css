@@ -9,16 +9,18 @@ a {
 #pass,#login,#path {margin-top: 8px;}
 
 .navbar, .nav{
-	margin-top:5px;
 	margin-bottom: 0px;}
 
 .nav-tabs{
 	border-bottom: none;
 }
 
+
+
 li.command{float:right;}
 
 div.content{
+margin-top: 5px;
 padding-right: 10px;
 padding-left: 10px;
 
