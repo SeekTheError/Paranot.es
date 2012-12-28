@@ -64,8 +64,7 @@ var pn = function($, CryptoJS) {
 			//handle ctrl+s
 
 			$("#input").live('keypress',function(event) {
-				return true;
-				console.log(event);
+				//console.log(event);
 				if(!(event.which == 115 && event.ctrlKey) && !(event.which == 19)) {
 					return true;
 				} else {
