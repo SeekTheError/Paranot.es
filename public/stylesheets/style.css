@@ -1,5 +1,4 @@
 body {
-  padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
@@ -9,11 +8,21 @@ a {
 
 #pass,#login,#path {margin-top: 8px;}
 
-#top-nav{width:100%;}
+.navbar{margin-bottom: 5px;}
 
 #addNewFile:hover{
 	cursor: pointer;
 }
 
 li.command{float:right;}
+
+div.content{
+padding-right: 10px;
+padding-left: 10px;
+
+}
+
+div#input{
+	margin: 4px;
+}
 

@@ -271,6 +271,7 @@ var pn = function($, CryptoJS) {
 		 */
 
 		function initUserInterface(tabs) {
+			console.log("init User Interface",tabs)
 			$("#inputs-navs").html("");
 			$("#commands").show();
 			var nav;
