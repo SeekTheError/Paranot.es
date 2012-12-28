@@ -284,6 +284,7 @@ var pn = function($, CryptoJS) {
 		}
 		function displayContent(response) {
 			if(response) {
+				$("#input").attr('contenteditable','true');
 				console.log("displaying",response)
 				$("#input").data('path',response.path);
 				console.log("displaying: " + response.path);
