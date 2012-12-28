@@ -19,10 +19,13 @@ var pn = function($, CryptoJS) {
 		// on reload to display the reloaded file
 
 		this.nextPath=null;
+		this.toSave=false;
 		/*
 		* Event originated from the user interface
 		*/
 		this.init = function() {
+			
+
 			$("#refresh").click(function(event){
 				event.preventDefault();
 				document.getElementById("input").innerHTML = "";
@@ -57,7 +60,16 @@ var pn = function($, CryptoJS) {
 			});
 			//autosave before changing account or doc
 			$("#input").focusout(function(event) {
+				if(toSave){
+				toSave=false;
 				save();
+				}
+			})
+			$("#input").focusin(function(event) {
+				if(!toSave){
+					toSave=true;
+					load();
+				}
 			})
 			$('#newFileName').live("click", function(event) {
 				event.preventDefault();

@@ -1,5 +1,7 @@
 TODO
 
+Bug on concurrent editing overriding change
+
 protect login from contening ":" > maybe not
 External audit of the global security
 https
