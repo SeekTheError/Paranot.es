@@ -4,6 +4,7 @@ GLOBAL
 protect login from contening ":" > maybe not
 External audit of the global security
 https
+state on load/save
 global interface improvment
 	edition
 	incite on where to edit

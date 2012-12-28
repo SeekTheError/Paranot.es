@@ -80,8 +80,6 @@ var pn = function($, CryptoJS) {
 			if(typeof path == "undefined") {
 				console.log("aborting, cause: nothing to load")
 			}
-
-
 			var key = CryptoJS.SHA1(login + pass).toString();
 			var url = "load";
 			console.log(path)
@@ -111,7 +109,9 @@ var pn = function($, CryptoJS) {
 				var pass = $("#pass").val();
 				var raw = CryptoJS.AES.decrypt(source, pass);
 				var result = CryptoJS.enc.Utf8.stringify(raw);
-				document.getElementById('input').textContent=result.toString();
+				var input=document.getElementById('input');
+				input.textContent=result.toString();
+				input.textContent==""?input.textContent=" ":false;
 				console.log("Loaded");
 			}
 		}
@@ -163,8 +163,6 @@ var pn = function($, CryptoJS) {
 			var input = $("#input").html();
 			var login = $("#login").val();
 			var pass = $("#pass").val();
-
-			var content = CryptoJS.AES.encrypt(input, pass).toString();
 			var key = CryptoJS.SHA1(login + pass).toString();
 
 			var url = "/createFile";
@@ -298,7 +296,7 @@ var pn = function($, CryptoJS) {
 		}
 
 		function dispatch(response) {
-			console.log("dispatcher: ",response);
+			//console.log("dispatcher: ",response);
 			if(response.status == "userDontExist") {
 				var create = window.confirm("This account does not exist, do you want to create it?")
 				if(create) {
