@@ -99,9 +99,6 @@ var pn = function($, CryptoJS) {
 			}).done(function(data) {
 				dispatch(data);
 			})
-
-
-
 		}
 
 		
@@ -275,6 +272,7 @@ var pn = function($, CryptoJS) {
 
 		function initUserInterface(tabs) {
 			$("#inputs-navs").html("");
+			$("#commands").show();
 			var nav;
 			var tab;
 			var empty = true;
@@ -286,13 +284,7 @@ var pn = function($, CryptoJS) {
 				}
 				$("#inputs-navs").append(nav);
 			};
-			//create the add file tab
-			var addNav = $('<li>').html('<a id="deleteFile"><i class="icon-trash"></i></a>').addClass('command');
-			$("#inputs-navs").append(addNav);
-			var addNav = $('<li>').html('<a id="addNewFile">+</a>').addClass('command');
-			$("#inputs-navs").append(addNav);
-			var addNav = $('<li>').html('<a id="newFileName" contenteditable="true"><i>New Note</i></a>').addClass('command');
-			$("#inputs-navs").append(addNav);
+			//Autoload ???
 			if(!empty){
 			//load()
 		}
@@ -329,11 +321,13 @@ var pn = function($, CryptoJS) {
 				displayContent(response)
 			}
 			if(response.status == "invalidPassword") {
+				$("#commands").hide();
 				window.alert("Invalid Password")
 			}
 			if(response.status == "invalidFileName") {
 				window.alert("Invalid FileName");
-				checkUser();
+				$('#newFileName').html('<i>New Note</i>')
+				
 			}
 			if(response.status == "fileDeleted") {
 				$("#input").data('path',null);
