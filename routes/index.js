@@ -147,7 +147,7 @@ exports.deleteFile = function(req, res) {
 		} else {
 			if(reply != params.key) {
 				res.send({
-					status: "refused"
+					status: "invalidCredentials"
 				});
 			}
 			var contentPath = userNamespace + ":" + params.path
@@ -206,7 +206,7 @@ exports.checkUser = function(req, res) {
 				});
 			} else {
 				res.send({
-					status: "invalidPassword"
+					status: "invalidCredentials"
 				});
 			}
 		}
@@ -266,7 +266,7 @@ exports.load = function(req, res) {
 		} else {
 			if(reply != key) {
 				res.send({
-					status: "refused"
+					status: "invalidCredentials"
 				});
 			}
 			var contentPath = userNamespace + ":" + params.path
@@ -274,13 +274,13 @@ exports.load = function(req, res) {
 			client.get(contentPath, function(err, reply) {
 				if(reply) {
 					res.send({
-						status: "loaded",
+						status: "fileLoaded",
 						content: reply,
 						path: params.path
 					});
 				} else {
 					res.send({
-						status: "pathDontExist"
+						status: "fileDontExist"
 					});
 				}
 			})
