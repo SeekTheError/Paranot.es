@@ -25,7 +25,6 @@ var pn = function($, CryptoJS) {
 		 * Event originated from the user interface
 		 */
 		this.init = function() {
-
 			$("#connect").click(function() {
 				checkUser();
 			});
@@ -155,7 +154,7 @@ var pn = function($, CryptoJS) {
 		 */
 
 		function load() {
-			document.getElementById('input').textContent = null;
+			//document.getElementById('input').textContent = null;
 			var login = $("#login").val();
 			var pass = $("#pass").val();
 			//The path if a tab is "clicked"
