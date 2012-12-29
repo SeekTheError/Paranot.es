@@ -29,8 +29,18 @@ var pn = function($, CryptoJS) {
 			$("#connect").click(function() {
 				checkUser();
 			});
+			$("#login").keypress(function(event) {
+				if(!(event.which == 13)) {
+					return true;
+				} else {
+					$("#pass").focus();
+					event.preventDefault();
+					return false;
+				}
+			});
+
 			$("#logout").click(function() {
-				window.location=""
+				window.location = ""
 			});
 			$("#refresh").click(function(event) {
 				event.preventDefault();
@@ -54,9 +64,10 @@ var pn = function($, CryptoJS) {
 				event.preventDefault();
 				var fileName = $("#input").data('path');
 				if(!fileName) {
+					window.alert("Please select the file that you want to delete first");
 					return;
 				}
-				var toDelete = window.confirm("Are you sure that you want to delete the file " + fileName);
+				var toDelete = window.confirm("Are you sure that you want to delete the file " + decodeURIComponent(fileName));
 				if(toDelete) {
 					deleteFile();
 				}
@@ -67,21 +78,26 @@ var pn = function($, CryptoJS) {
 				checkUser()
 			});
 
-			//variable to prevent data loss
+			/*
+			 * variable to prevent data loss
+			 * autosave when the input area lose focus ( before changing doc, Signout,switching tab,etc)
+			 */
 			this.toSave = false;
-			//autosave before changing account or doc
 			$("#input").focusout(function(event) {
 				if(toSave) {
 					save();
 					toSave = false;
 				}
-			})
+			});
+			/*
+			 *reload in case there was some modification from another browser on the same account
+			 */
 			$("#input").focusin(function(event) {
 				if(!toSave) {
 					toSave = true;
 					load();
 				}
-			})
+			});
 
 			/**
 			 * empty the new file box on click
@@ -275,7 +291,7 @@ var pn = function($, CryptoJS) {
 				return false;
 			}
 			$("#input").hide();
-			
+
 			//prevent useless save on the welcome page
 			var key = CryptoJS.SHA1(login + pass).toString();
 
@@ -304,7 +320,6 @@ var pn = function($, CryptoJS) {
 				return false;
 			}
 			var key = CryptoJS.SHA1(login + pass).toString();
-
 			var url = "/createUser";
 			var data = {
 				login: encodeURIComponent(login),
@@ -347,7 +362,7 @@ var pn = function($, CryptoJS) {
 			$("#inputs-navs").html("");
 			$(".command").show();
 			$("#pass").hide();
-			$("#login").attr("disabled",true)
+			$("#login").attr("disabled", true)
 			$("#connect").hide();
 			$("#logout").show();
 			var nav;
@@ -369,6 +384,7 @@ var pn = function($, CryptoJS) {
 				load();
 			}
 		}
+
 		/*
 		 *Event originated from a server response
 		 */
@@ -416,7 +432,6 @@ var pn = function($, CryptoJS) {
 				$("#input").data('path', null);
 				checkUser();
 			}
-
 		}
 
 		return this;
