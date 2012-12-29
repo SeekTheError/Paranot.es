@@ -26,6 +26,7 @@
 			window.console.error = function(){}
       window.console.info = function(){}
 		}
+    $(".command").hide();
 		pn.init();
 	});
 </script>
@@ -45,16 +46,20 @@
           </button>
           <a class="brand" href="/">&nbsp;Paranot.es</a>
           <div class="nav-collapse collapse">
-            <ul class="nav">
+            <ul class="nav pull-right">
               <li>
-              	<input id="login" type="text" placeholder="Login"/>
+              	<input id="login" class="input-small" type="text" placeholder="Login"/>
               </li>
               <li>
-              	<input id="pass" type="password" placeholder="Password"/>
+              	<input id="pass" class="input-small" type="password" placeholder="Password"/>
               </li>
               <li>
-                <input id="ok" class="btn" value="Connection" type="submit" placeholder="ok"/>
+                <input id="connect" class="btn" value="Connection" type="submit" />
               </li>
+              <li>
+                <input id="logout" style="display:none;" class="btn btn-danger" value="Log out" type="submit" />
+              </li>
+              <!--<li class="command" title="Log out"><a href="/" id="off" ><i class="icon-off icon-white"></i></a></li>-->
             </ul>
           </div>
         </div>
@@ -68,18 +73,14 @@
     </ul>
 </div>
 <div class="span4">
-  <ul id="commands" class="nav nav-tabs" style="display:none" >
-    <li class="command" title="Delete the current note"><a href="#" id="deleteFile"><i class="icon-trash"></i></a></li>
-    <li class="command" title="Create a note"><a href="#" id="addNewFile">&nbsp;+&nbsp;</a></li>
+  <ul id="commands" class="nav nav-tabs"  >
+    <li  style="display:none" class="command" title="Delete the current note"><a href="#" id="deleteFile"><i class="icon-trash"></i></a></li>
+    <li class="command" title="Create a note"><a href="#" id="addNewFile"><i class="icon-plus"></i></a></li>
     <li class="command"><a href="#" id="newFileName" contenteditable="true"><i>New Note</i></a></li>
     <li class="command" title="Refresh"><a href="#" id="refresh"><i class="icon-refresh"></i></a></li>
-    <li class="command" title="Log out"><a href="/" id="off" ><i class="icon-off"></i></a></li>
   </ul>
   </div>
  </div>
-
-  
-
   </div>
   <div>
   <div id="input" contenteditable="false">

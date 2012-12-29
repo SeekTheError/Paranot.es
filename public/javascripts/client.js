@@ -14,9 +14,10 @@ var pn = function($, CryptoJS) {
 		if(!$ || !CryptoJS) {
 			console.error("Missing Dependencies");
 		}
-		// this variable is used for two purpose:
-		//on file Creation to autodisplay the new file
-		// on reload to display the reloaded file
+		/* this variable is used for two purpose:
+		 *	on file Creation to autodisplay the new file
+		 *	on reload to display the reloaded file
+		 */
 		this.nextPath = null;
 
 
@@ -25,9 +26,12 @@ var pn = function($, CryptoJS) {
 		 */
 		this.init = function() {
 
-			$("#ok").click(function(){
+			$("#connect").click(function() {
 				checkUser();
-			})
+			});
+			$("#logout").click(function() {
+				window.location=""
+			});
 			$("#refresh").click(function(event) {
 				event.preventDefault();
 				document.getElementById("input").innerHTML = "";
@@ -263,14 +267,16 @@ var pn = function($, CryptoJS) {
 
 		function checkUser() {
 			console.log("checking user");
-			$("#input").hide();
 			var login = $("#login").val();
 			var pass = $("#pass").val();
-			//prevent useless save on the welcome page
 			if(login == "" || pass == "") {
 				console.log("abort")
+				window.alert("Please enter a login and a password");
 				return false;
 			}
+			$("#input").hide();
+			
+			//prevent useless save on the welcome page
 			var key = CryptoJS.SHA1(login + pass).toString();
 
 			var url = "/checkUser";
@@ -316,7 +322,6 @@ var pn = function($, CryptoJS) {
 
 		function displayContent(response) {
 			if(response) {
-
 				$("#input").attr('contenteditable', 'true');
 				console.log("displaying", response)
 				console.log("displaying: " + response.path);
@@ -340,7 +345,11 @@ var pn = function($, CryptoJS) {
 		function initUserInterface(tabs) {
 			console.log("init User Interface", tabs)
 			$("#inputs-navs").html("");
-			$("#commands").show();
+			$(".command").show();
+			$("#pass").hide();
+			$("#login").attr("disabled",true)
+			$("#connect").hide();
+			$("#logout").show();
 			var nav;
 			var tab;
 			var empty = true;
@@ -363,7 +372,6 @@ var pn = function($, CryptoJS) {
 		/*
 		 *Event originated from a server response
 		 */
-
 		function dispatch(response) {
 			console.log("dispatcher: ", response);
 			if(response.status == "userCreated") {
@@ -396,7 +404,7 @@ var pn = function($, CryptoJS) {
 				displayContent(response);
 			}
 			if(response.status == "invalidCredentials") {
-				$("#commands").hide();
+				$(".command").hide();
 				$("#inputs-navs").html("");
 				window.alert("Invalid Password");
 			}
@@ -408,7 +416,6 @@ var pn = function($, CryptoJS) {
 				$("#input").data('path', null);
 				checkUser();
 			}
-
 
 		}
 
