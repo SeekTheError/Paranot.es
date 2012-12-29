@@ -72,8 +72,6 @@ exports.createFile = function(req, res) {
 		return;
 	}
 
-
-	//checking user existence
 	var userNamespace = "user:" + params.login
 	if(params.path == "") {
 		res.send({
