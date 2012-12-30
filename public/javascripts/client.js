@@ -85,7 +85,7 @@ var pn = function($, CryptoJS) {
 			$("#input").focusout(function(event) {
 				if(toSave) {
 					save();
-					toSave = false;
+					toSave = false ;
 				}
 			});
 			/*
@@ -94,18 +94,29 @@ var pn = function($, CryptoJS) {
 			$("#input").focusin(function(event) {
 				if(!toSave) {
 					toSave = true;
-					load();
+					//load();
 				}
 			});
 
 			/**
 			 * empty the new file box on click
 			 */
-			$('#newFileName').live("click", function(event) {
+			$('#newFileName').click( function(event) {
 				event.preventDefault();
 				$('#newFileName').html("");
+				$('#newFileName').focus();
 				return false;
 			});
+			/**
+			* Save button for tactile interfaces
+			*/
+			$('#save').click(function(){
+				console.log("SAVE");
+				if(toSave) {
+					save();
+					toSave = false;
+				}
+			})
 
 			/*
 			 * Create a file when enter is pressed
@@ -124,7 +135,7 @@ var pn = function($, CryptoJS) {
 			 * Either create a new file if the #newFileName has been modified by the user,
 			 * or set the focus on the #newFile
 			 */
-			$("#addNewFile").live("click", function(event) {
+			$("#addNewFile").click( function(event) {
 				event.preventDefault();
 				if($('#newFileName i').length > 0) {
 					$('#newFileName').html("");
@@ -154,7 +165,7 @@ var pn = function($, CryptoJS) {
 		 */
 
 		function load() {
-			//document.getElementById('input').textContent = null;
+			$("#input").hide();
 			var login = $("#login").val();
 			var pass = $("#pass").val();
 			//The path if a tab is "clicked"
@@ -333,9 +344,12 @@ var pn = function($, CryptoJS) {
 				dispatch(data);
 			})
 		}
-
+		/*
+		 *
+		 */
 		function displayContent(response) {
 			if(response) {
+				$("#input").show();
 				$("#input").attr('contenteditable', 'true');
 				console.log("displaying", response)
 				console.log("displaying: " + response.path);
@@ -352,10 +366,10 @@ var pn = function($, CryptoJS) {
 				$("#input").focus()
 			}
 		}
+
 		/*
 		 *load or reload the tabs
 		 */
-
 		function initUserInterface(tabs) {
 			console.log("init User Interface", tabs)
 			$("#inputs-navs").html("");
