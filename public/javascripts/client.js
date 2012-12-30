@@ -59,7 +59,7 @@ var pn = function($, CryptoJS) {
 			/**
 			 *
 			 */
-			$('#deleteFile').live("click", function() {
+			$('#deleteFile').live("click", function(event) {
 				event.preventDefault();
 				var fileName = $("#input").data('path');
 				if(!fileName) {
@@ -83,13 +83,15 @@ var pn = function($, CryptoJS) {
 			 */
 			this.toSave = false;
 			$("#input").focusout(function(event) {
+				event.preventDefault();
 				if(toSave) {
 					save();
 					toSave = false ;
 				}
+				return false;
 			});
 			/*
-			 *reload in case there was some modification from another browser on the same account
+			 *activate autosave when the input will lose the focus
 			 */
 			$("#input").focusin(function(event) {
 				if(!toSave) {
