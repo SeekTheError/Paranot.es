@@ -1,6 +1,10 @@
-Paranot.es is a web application that allow user to manage their note in a "safe" way,
+Paranot.es is a web application that allow user to manage their notes in a "safe" way,
 By safe, I mean that the notes are encrypted on the client side, so the decrypted version never transit on the network
-The encryption method used is aes, and the key is the user password. This password does not transit directly on the network either, instead, a hash of the login and the password is used for user authentication.
+The encryption method used for notes is AES(http://en.wikipedia.org/wiki/Advanced_Encryption_Standard), and the key is the user password. This password does not transit directly on the network either, instead, a hash of the login and the password is used for user authentication.
+
+This is the lib used for encryption:
+https://code.google.com/p/crypto-js/
+
 
 You can see it live at http://paranot.es
 
