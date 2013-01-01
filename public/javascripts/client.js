@@ -82,7 +82,7 @@ var pn = function($, CryptoJS) {
 			 * variable to prevent data loss
 			 * autosave when the input area lose focus ( before changing doc, Signout,switching tab,etc)
 			 */
-			this.toSave = false;
+			var toSave = false;
 			$("#input").focusout(function(event) {
 				event.preventDefault();
 				if(toSave) {
@@ -131,12 +131,10 @@ var pn = function($, CryptoJS) {
 			Store.saveStatus = "DONE_TYPING";
 
 			$("#input").keyup(function(e) {
-				console.log(Store.saveStatus);
 				Store.inputContent = $("#input").val();
 				if(Store.saveStatus == "DONE_TYPING") {
 					Store.saveStatus = "IS_TYPING";
 					$("#saveStatus").html("Saving");
-					console.log("Not saved");
 				};
 				if(Store.saveStatus == "IS_TYPING") {
 					var lastInputContent = $("#input").html();
@@ -161,7 +159,6 @@ var pn = function($, CryptoJS) {
 			 * Create a file when enter is pressed
 			 */
 			$("#newFileName").live('keypress', function(event) {
-				//console.log(event);
 				if(!(event.which == 13)) {
 					return true;
 				} else {
@@ -189,7 +186,6 @@ var pn = function($, CryptoJS) {
 			 *handle ctrl+s to save the # input
 			 */
 			$("#input").live('keypress', function(event) {
-				//console.log(event);
 				if(!(event.which == 115 && event.ctrlKey) && !(event.which == 19)) {
 					return true;
 				} else {
