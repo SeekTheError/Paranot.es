@@ -48,7 +48,7 @@ exports.save = function(req, res) {
 			client.set(contentPath, params.content, function(err, reply) {
 				if(reply) {
 					res.send({
-						status: "saved"
+						status: "fileSaved"
 					});
 				} else {
 					res.send({

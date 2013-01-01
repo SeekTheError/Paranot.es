@@ -20,6 +20,7 @@ var pn = function($, CryptoJS) {
 		 */
 		this.nextPath = null;
 
+		var Store = {};
 
 		/*
 		 * Event originated from the user interface
@@ -86,7 +87,7 @@ var pn = function($, CryptoJS) {
 				event.preventDefault();
 				if(toSave) {
 					save();
-					toSave = false ;
+					toSave = false;
 				}
 				return false;
 			});
@@ -96,30 +97,66 @@ var pn = function($, CryptoJS) {
 			$("#input").focusin(function(event) {
 				if(!toSave) {
 					toSave = true;
-					//load();
+					load();
 				}
 			});
 
 			/**
 			 * empty the new file box on click
 			 */
-			$('#newFileName').click( function(event) {
+			$('#newFileName').click(function(event) {
 				event.preventDefault();
 				$('#newFileName').html("");
 				$('#newFileName').focus();
 				return false;
 			});
 			/**
-			* Save button for tactile interfaces
-			*/
-			$('#save').click(function(){
+			 * Save button for tactile interfaces
+			 */
+			$('#save').click(function() {
 				console.log("SAVE");
 				if(toSave) {
 					save();
 					toSave = false;
 				}
-			})
+			});
 
+			/**
+			* Auto save when the content is modified
+			*/
+
+			//the time the user has to stop typing for the saved to be performed
+			var TIME_OUT_VALUE = 1000;
+			//the saveStatus var is used in the state machine
+			Store.saveStatus = "DONE_TYPING";
+
+			$("#input").keyup(function(e) {
+				console.log(Store.saveStatus);
+				Store.inputContent = $("#input").val();
+				if(Store.saveStatus == "DONE_TYPING") {
+					Store.saveStatus = "IS_TYPING";
+					$("#saveStatus").html("Saving");
+					console.log("Not saved");
+				};
+				if(Store.saveStatus == "IS_TYPING") {
+					var lastInputContent = $("#input").html();
+					setTimeout(function() {
+						var inputContent = $("#input").html();
+						if(inputContent == lastInputContent && Store.lastSavedInput != inputContent) {
+							Store.saveStatus = "DONE_TYPING";
+							Store.lastSavedInput=inputContent;
+							save();
+							
+						} else {
+							return;
+						}
+					}, TIME_OUT_VALUE);
+				}
+
+			});
+
+
+			/// TEST
 			/*
 			 * Create a file when enter is pressed
 			 */
@@ -137,7 +174,7 @@ var pn = function($, CryptoJS) {
 			 * Either create a new file if the #newFileName has been modified by the user,
 			 * or set the focus on the #newFile
 			 */
-			$("#addNewFile").click( function(event) {
+			$("#addNewFile").click(function(event) {
 				event.preventDefault();
 				if($('#newFileName i').length > 0) {
 					$('#newFileName').html("");
@@ -227,6 +264,7 @@ var pn = function($, CryptoJS) {
 				content: content
 			}
 			console.log("saving on" + url)
+			
 			$.ajax({
 				url: url,
 				type: 'POST',
@@ -349,6 +387,7 @@ var pn = function($, CryptoJS) {
 		/*
 		 *
 		 */
+
 		function displayContent(response) {
 			if(response) {
 				$("#input").show();
@@ -362,16 +401,18 @@ var pn = function($, CryptoJS) {
 				var result = CryptoJS.enc.Utf8.stringify(raw);
 				var input = document.getElementById('input');
 				input.innerHTML = result.toString();
+				// init the autosave function for the new note
+				Store.lastSavedInput=result.toString();
 				$("#input").data('path', response.path);
-				//toSave=false;
 				console.log("Loaded");
-				$("#input").focus()
+				//$("#input").focus()
 			}
 		}
 
 		/*
 		 *load or reload the tabs
 		 */
+
 		function initUserInterface(tabs) {
 			console.log("init User Interface", tabs)
 			$("#inputs-navs").html("");
@@ -403,6 +444,7 @@ var pn = function($, CryptoJS) {
 		/*
 		 *Event originated from a server response
 		 */
+
 		function dispatch(response) {
 			console.log("dispatcher: ", response);
 			if(response.status == "userCreated") {
@@ -420,6 +462,12 @@ var pn = function($, CryptoJS) {
 					createUser();
 				}
 			}
+
+			if(response.status == "fileSaved"){
+				$("#saveStatus").html("Saved");
+			}
+
+
 			if(response.status == "fileCreated") {
 				console.log("File successfully created");
 				checkUser();
