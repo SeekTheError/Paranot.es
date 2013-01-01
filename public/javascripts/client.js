@@ -14,13 +14,17 @@ var pn = function($, CryptoJS) {
 		if(!$ || !CryptoJS) {
 			console.error("Missing Dependencies");
 		}
+		
+		
+
+		// a way to scope some variables
+		var Store = {};
+
 		/* this variable is used for two purpose:
 		 *	on file Creation to autodisplay the new file
 		 *	on reload to display the reloaded file
 		 */
-		this.nextPath = null;
-
-		var Store = {};
+		Store.nextPath = null;
 
 		/*
 		 * Event originated from the user interface
@@ -45,7 +49,7 @@ var pn = function($, CryptoJS) {
 			$("#refresh").click(function(event) {
 				event.preventDefault();
 				document.getElementById("input").innerHTML = "";
-				nextPath = $("#input").data("path");
+				Store.nextPath = $("#input").data("path");
 				checkUser();
 				return false;
 			})
@@ -81,22 +85,26 @@ var pn = function($, CryptoJS) {
 			/*
 			 * variable to prevent data loss
 			 * autosave when the input area lose focus ( before changing doc, Signout,switching tab,etc)
+			 * and avoid the double load when the function displayContent is called
+			 * TODO: rename the variable(misleading name)
 			 */
-			var toSave = false;
+			Store.toSave = false;
+
+
 			$("#input").focusout(function(event) {
 				event.preventDefault();
-				if(toSave) {
+				if(Store.toSave) {
 					save();
-					toSave = false;
+					Store.toSave = false;
 				}
 				return false;
 			});
 			/*
-			 *activate autosave when the input will lose the focus
+			 *activate autoload when the input gain focus
 			 */
 			$("#input").focusin(function(event) {
-				if(!toSave) {
-					toSave = true;
+				if(!Store.toSave) {
+					Store.toSave = true;
 					load();
 				}
 			});
@@ -115,9 +123,9 @@ var pn = function($, CryptoJS) {
 			 */
 			$('#save').click(function() {
 				console.log("SAVE");
-				if(toSave) {
+				if(Store.toSave) {
 					save();
-					toSave = false;
+					Store.toSave = false;
 				}
 			});
 
@@ -273,7 +281,7 @@ var pn = function($, CryptoJS) {
 
 		function createFile(path) {
 			//setting the path to display
-			this.nextPath = encodeURIComponent(path);
+			Store.nextPath = encodeURIComponent(path);
 			console.log("creating new file: " + path);
 			$("#newFileName").html("<i>New Note</i>")
 			var input = $("#input").html();
@@ -401,7 +409,8 @@ var pn = function($, CryptoJS) {
 				Store.lastSavedInput=result.toString();
 				$("#input").data('path', response.path);
 				console.log("Loaded");
-				//$("#input").focus()
+				Store.toSave=true;
+				$("#input").focus();
 			}
 		}
 
@@ -423,16 +432,16 @@ var pn = function($, CryptoJS) {
 			for(var i = 0; i < tabs.length; i++) {
 				var nav = $('<li>').html('<a class="file" href="#" data-toggle="tab">' + decodeURIComponent(tabs[i]) + '</a>')
 				//if next path has been set on the createFile function
-				if(nextPath == decodeURIComponent(tabs[i])) {
+				if(Store.nextPath == decodeURIComponent(tabs[i])) {
 					$(nav).addClass("active");
 					empty = false;
 				}
 				$("#inputs-navs").append(nav);
 			};
 			//Autoload 
-			if(!empty && this.nextPath) {
-				var path = this.nextPath;
-				this.nextPath = null;
+			if(!empty && Store.nextPath) {
+				//var path = Store.nextPath;
+				Store.nextPath = null;
 				load();
 			}
 		}
