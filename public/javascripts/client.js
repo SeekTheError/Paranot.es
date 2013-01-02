@@ -14,8 +14,6 @@ var pn = function($, CryptoJS) {
 		if(!$ || !CryptoJS) {
 			console.error("Missing Dependencies");
 		}
-		
-		
 
 		// a way to scope some variables
 		var Store = {};
@@ -252,11 +250,6 @@ var pn = function($, CryptoJS) {
 				return;
 			}
 
-			//prevent useless save on the welcome page
-			if(login == "" || pass == "") {
-				console.log("abort")
-				return false;
-			}
 			var content = CryptoJS.AES.encrypt(input, pass).toString();
 			var key = CryptoJS.SHA1(login + pass).toString();
 
@@ -267,7 +260,6 @@ var pn = function($, CryptoJS) {
 				path: path,
 				content: content
 			}
-			console.log("saving on" + url)
 			
 			$.ajax({
 				url: url,
@@ -345,8 +337,6 @@ var pn = function($, CryptoJS) {
 				return false;
 			}
 			$("#input").hide();
-
-			//prevent useless save on the welcome page
 			var key = CryptoJS.SHA1(login + pass).toString();
 
 			var url = "/checkUser";
@@ -368,11 +358,7 @@ var pn = function($, CryptoJS) {
 			console.log("creating user");
 			var login = $("#login").val();
 			var pass = $("#pass").val();
-			//prevent useless save on the welcome page
-			if(login == "" || pass == "") {
-				console.log("abort")
-				return false;
-			}
+
 			var key = CryptoJS.SHA1(login + pass).toString();
 			var url = "/createUser";
 			var data = {
@@ -389,7 +375,7 @@ var pn = function($, CryptoJS) {
 			})
 		}
 		/*
-		 *
+		 * Decrypt and display a note
 		 */
 
 		function displayContent(response) {
@@ -401,23 +387,23 @@ var pn = function($, CryptoJS) {
 				var source = response.content
 				var pass = $("#pass").val();
 				var raw = CryptoJS.AES.decrypt(source, pass);
-				$("#input").show();
 				var result = CryptoJS.enc.Utf8.stringify(raw);
 				var input = document.getElementById('input');
 				input.innerHTML = result.toString();
+
 				// init the autosave function for the new note
 				Store.lastSavedInput=result.toString();
 				$("#input").data('path', response.path);
 				console.log("Loaded");
+				//
 				Store.toSave=true;
 				$("#input").focus();
 			}
 		}
 
 		/*
-		 *load or reload the tabs
+		 *load or reload the tabs, and load
 		 */
-
 		function initUserInterface(tabs) {
 			console.log("init User Interface", tabs)
 			$("#inputs-navs").html("");
@@ -440,14 +426,13 @@ var pn = function($, CryptoJS) {
 			};
 			//Autoload 
 			if(!empty && Store.nextPath) {
-				//var path = Store.nextPath;
 				Store.nextPath = null;
 				load();
 			}
 		}
 
 		/*
-		 *Event originated from a server response
+		 *Route Event originated from a server response
 		 */
 
 		function dispatch(response) {
@@ -472,7 +457,6 @@ var pn = function($, CryptoJS) {
 				$("#saveStatus").html("Saved");
 			}
 
-
 			if(response.status == "fileCreated") {
 				console.log("File successfully created");
 				checkUser();
@@ -489,7 +473,6 @@ var pn = function($, CryptoJS) {
 			}
 			if(response.status == "invalidCredentials") {
 				$(".command").hide();
-				$("#inputs-navs").html("");
 				window.alert("Invalid Password");
 			}
 			if(response.status == "invalidFileName") {
