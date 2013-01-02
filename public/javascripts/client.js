@@ -15,7 +15,7 @@ var pn = function($, CryptoJS) {
 			console.error("Missing Dependencies");
 		}
 
-		// a way to scope some variables
+		// a way to scope some variables at the pn object level;
 		var Store = {};
 
 		/* this variable is used for two purpose:
@@ -40,10 +40,12 @@ var pn = function($, CryptoJS) {
 					return false;
 				}
 			});
-
+			// there is no cookie and no form, so reloading the page will log out
 			$("#logout").click(function() {
 				window.location = ""
 			});
+
+			//Reload the current file
 			$("#refresh").click(function(event) {
 				event.preventDefault();
 				document.getElementById("input").innerHTML = "";
@@ -53,6 +55,7 @@ var pn = function($, CryptoJS) {
 			})
 			/**
 			 *Load a file when the user click on a tab
+			 *The file to load is determined via the active element bootstrap put on tabs
 			 */
 			$("#inputs-navs li a.file").live('click', function(event) {
 				event.preventDefault();
@@ -64,6 +67,7 @@ var pn = function($, CryptoJS) {
 			 */
 			$('#deleteFile').live("click", function(event) {
 				event.preventDefault();
+
 				var fileName = $("#input").data('path');
 				if(!fileName) {
 					window.alert("Please select the file that you want to delete first");
@@ -73,27 +77,27 @@ var pn = function($, CryptoJS) {
 				if(toDelete) {
 					deleteFile();
 				}
+
 				return false;
 			});
-
+			//trigger the user verification when the enter key is pressed
 			$("#pass").change(function() {
 				checkUser()
 			});
 
 			/*
-			 * variable to prevent data loss
-			 * autosave when the input area lose focus ( before changing doc, Signout,switching tab,etc)
-			 * and avoid the double load when the function displayContent is called
-			 * TODO: rename the variable(misleading name)
+			 * variable to prevent data loss or multiple load
+			 * activate autosave when the input area lose focus 
+			 *( before changing doc, Signout,switching tab,etc)
 			 */
-			Store.toSave = false;
+			Store.inputSync = true;
 
 
 			$("#input").focusout(function(event) {
 				event.preventDefault();
-				if(Store.toSave) {
+				if(Store.inputSync) {
 					save();
-					Store.toSave = false;
+					Store.inputSync = false;
 				}
 				return false;
 			});
@@ -101,10 +105,23 @@ var pn = function($, CryptoJS) {
 			 *activate autoload when the input gain focus
 			 */
 			$("#input").focusin(function(event) {
-				if(!Store.toSave) {
-					Store.toSave = true;
+				if(!Store.inputSync) {
+					Store.inputSync = true;
 					load();
 				}
+			});
+
+			/**
+			 * Save button for tactile interfaces
+			 */
+			$('#save').click(function(event) {
+				event.preventDefault();	
+				console.log("SAVE");
+				if(Store.inputSync) {
+					save();
+					Store.inputSync = false;
+				}
+				return false;
 			});
 
 			/**
@@ -112,20 +129,10 @@ var pn = function($, CryptoJS) {
 			 */
 			$('#newFileName').click(function(event) {
 				event.preventDefault();
-				$('#newFileName').html("");
-				$('#newFileName').focus();
+				$('#newFileName').html("").focus();
 				return false;
 			});
-			/**
-			 * Save button for tactile interfaces
-			 */
-			$('#save').click(function() {
-				console.log("SAVE");
-				if(Store.toSave) {
-					save();
-					Store.toSave = false;
-				}
-			});
+		
 
 			/**
 			* Auto save when the content is modified
@@ -143,6 +150,8 @@ var pn = function($, CryptoJS) {
 					$("#saveStatus").html("Saving");
 				};
 				if(Store.saveStatus == "IS_TYPING") {
+					//this variable will show whether the content has been modified after the call to
+					//setTimeout. If not it will be saved. Without this, every keyUp event will trigger a save
 					var lastInputContent = $("#input").html();
 					setTimeout(function() {
 						var inputContent = $("#input").html();
@@ -159,8 +168,6 @@ var pn = function($, CryptoJS) {
 
 			});
 
-
-			/// TEST
 			/*
 			 * Create a file when enter is pressed
 			 */
@@ -201,6 +208,8 @@ var pn = function($, CryptoJS) {
 				}
 			});
 		}
+
+		
 		/*
 		 * Load a file
 		 */
@@ -395,8 +404,8 @@ var pn = function($, CryptoJS) {
 				Store.lastSavedInput=result.toString();
 				$("#input").data('path', response.path);
 				console.log("Loaded");
-				//
-				Store.toSave=true;
+				//this prevent a reload when the .focus method is called
+				Store.inputSync=true;
 				$("#input").focus();
 			}
 		}
@@ -409,8 +418,10 @@ var pn = function($, CryptoJS) {
 			$("#inputs-navs").html("");
 			$(".command").show();
 			$("#pass").hide();
-			$("#login").attr("disabled", true)
+			$("#login").hide()
 			$("#connect").hide();
+			$("#userName").html($("#login").val());
+			$('#userName').show();
 			$("#logout").show();
 			var nav;
 			var tab;
@@ -434,7 +445,6 @@ var pn = function($, CryptoJS) {
 		/*
 		 *Route Event originated from a server response
 		 */
-
 		function dispatch(response) {
 			console.log("dispatcher: ", response);
 			if(response.status == "userCreated") {

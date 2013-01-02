@@ -8,14 +8,17 @@ a {
 
 #pass,#login,#connect,#logout{margin-top: 8px;}
 
+#userName {
+	line-height: 22.5px;
+	padding-right: 5px;
+}
+
 .navbar, .nav{
 	margin-bottom: 0px;}
 
 .nav-tabs{
 	border-bottom: none;
 }
-
-
 
 li.command{float:right;}
 

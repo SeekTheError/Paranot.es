@@ -28,7 +28,7 @@
 		}
     $(".command").hide();
 		pn.init();
-    $("#login").focus();
+    //$("#login").focus();
 	});
 </script>
 <!--[if lt IE 9]>
@@ -49,6 +49,9 @@
           <div class="nav-collapse collapse">
             <ul class="nav pull-right">
               <li>
+                <div> <h3 id="userName"></h3></div>
+              </li>
+              <li>
               	<input id="login" class="input-small" type="text" placeholder="Login"/>
               </li>
               <li>
@@ -60,7 +63,6 @@
               <li>
                 <input id="logout" style="display:none;" class="btn btn-danger" value="Log out" type="submit" />
               </li>
-              <!--<li class="command" title="Log out"><a href="/" id="off" ><i class="icon-off icon-white"></i></a></li>-->
             </ul>
           </div>
         </div>
