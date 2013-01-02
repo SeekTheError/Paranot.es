@@ -29,11 +29,11 @@ app.configure('development', function() {
 
 app.get('/', routes.index);
 app.post('/save', routes.save);
+app.post('/load', routes.load);
 app.post('/createUser', routes.createUser);
 app.post('/checkUser', routes.checkUser);
-app.post('/createFile', routes.createFile);
 app.post('/deleteFile', routes.deleteFile);
-app.post('/load', routes.load);
+
 
 http.createServer(app).listen(app.get('port'), function() {
   console.log("Express server listening on port " + app.get('port'));

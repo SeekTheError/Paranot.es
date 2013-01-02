@@ -9,30 +9,71 @@ exports.index = function(req, res) {
 /*
  * Init redis
  */
-
 var redis = require("redis"),
 	client = redis.createClient();
 
 client.on("error", function(err) {
-	console.log("Error " + err);
+	console.error("Error " + err);
 });
 
-/**
- *TODO : check that the file exist
+/*
+ * Check if the credentials are set and not null, 
+ *return true if everything is okay
+ * else respond to the client directly
  */
+
+function credentialsSet(params, res) {
+	if(params.login == "" || params.key == "") {
+		res.send({
+			status: "invalidCredentials"
+		});
+		return false;
+	}
+	return true;
+}
+
+/*
+* Check
+*/
+
+function pathSet(params,res){
+	if(params.path == "" ) {
+		res.send({
+			status: "invalidFileName"
+		});
+		return false;
+	}
+	return true;
+}
+
+/*
+ * return the UserNameSpace, whitch is basically the user account key on redis
+ */
+
+function getUserNameSpace(params) {
+	return "user:" + params.login;
+}
+/*
+ * return the contentPath, witch is the redis key to a specific note
+ */
+
+function getContentPath(params) {
+	return "user:" + params.login + ":" + params.path;
+}
+
+/*
+* Create or save an existing file
+*/
 exports.save = function(req, res) {
 	var params = req.body;
-	var login=params.login;
-	var key =params.key;
-	if(login == "" || key == ""){
-		res.send({
-					status: "invalidCredentials"
-				});
+	if(!credentialsSet(params, res)) {
 		return;
 	}
-	//checking user existence
-	var userNamespace = "user:" + params.login
-	client.get(userNamespace, function(err, reply) {
+	if(!pathSet(params)) {
+		return;
+	}
+
+	client.get(getUserNameSpace(params), function(err, reply) {
 		if(!reply) {
 			res.send({
 				status: "userDontExist"
@@ -42,17 +83,18 @@ exports.save = function(req, res) {
 				res.send({
 					status: "refused"
 				});
+				return;
 			}
-			//TODO : check that file exist before saving
-			var contentPath = userNamespace + ":" + params.path
-			client.set(contentPath, params.content, function(err, reply) {
+			client.set(getContentPath(params), params.content, function(err, reply) {
 				if(reply) {
+					var status=params.newFile?"fileCreated":"fileSaved";
 					res.send({
-						status: "fileSaved"
+						status: status
 					});
 				} else {
 					res.send({
-						status: "error"
+						status: "error",
+						message: "troube while saving"
 					});
 				}
 			})
@@ -60,26 +102,17 @@ exports.save = function(req, res) {
 	})
 };
 
-exports.createFile = function(req, res) {
+
+exports.load = function(req, res) {
 	var params = req.body;
-
-	var login=params.login;
-	var key =params.key;
-	if(login == "" || key == ""){
-		res.send({
-					status: "invalidCredentials"
-				});
+	if(!credentialsSet(params, res)) {
+		return;
+	}
+	if(!pathSet(params)) {
 		return;
 	}
 
-	var userNamespace = "user:" + params.login
-	if(params.path == "") {
-		res.send({
-			status: "invalidFileName"
-		});
-		return;
-	}
-	client.get(userNamespace, function(err, reply) {
+	client.get(getUserNameSpace(params), function(err, reply) {
 		if(!reply) {
 			res.send({
 				status: "userDontExist"
@@ -87,57 +120,39 @@ exports.createFile = function(req, res) {
 		} else {
 			if(reply != params.key) {
 				res.send({
-					status: "refused"
+					status: "invalidCredentials"
 				});
+				return;
 			}
-			var contentPath = userNamespace + ":" + params.path
-
-			client.get(contentPath, function(err, reply) {
-				if(!reply) {
-					client.set(contentPath, "x", function(err, reply) {
-						if(reply) {
-							res.send({
-								status: "fileCreated",
-								path: params.path
-							});
-						} else {
-							res.send({
-								status: "error"
-							});
-						}
+			client.get(getContentPath(params), function(err, reply) {
+				if(reply) {
+					res.send({
+						status: "fileLoaded",
+						content: reply,
+						path: params.path
 					});
 				} else {
 					res.send({
-						status: "fileAlreadyExist"
+						status: "fileDontExist"
 					});
-
 				}
-			});
+			})
+
 		}
 	})
 };
 
 exports.deleteFile = function(req, res) {
 	var params = req.body;
-	//checking user existence
-
-	var login=params.login;
-	var key =params.key;
-	if(login == "" || key == ""){
-		res.send({
-					status: "invalidCredentials"
-				});
+	if(!credentialsSet(params, res)) {
 		return;
 	}
 
-	var userNamespace = "user:" + login
-	if(params.path == "") {
-		res.send({
-			status: "invalidFileName"
-		});
+	if(!pathSet(params)) {
 		return;
 	}
-	client.get(userNamespace, function(err, reply) {
+
+	client.get(getUserNameSpace(params), function(err, reply) {
 		if(!reply) {
 			res.send({
 				status: "userDontExist"
@@ -147,18 +162,19 @@ exports.deleteFile = function(req, res) {
 				res.send({
 					status: "invalidCredentials"
 				});
+				return;
 			}
-			var contentPath = userNamespace + ":" + params.path
-			client.get(contentPath, function(err, reply) {
+			client.get(getContentPath(params), function(err, reply) {
 				if(reply) {
-					client.del(contentPath, function(err, reply) {
+					client.del(getContentPath(params), function(err, reply) {
 						if(reply) {
 							res.send({
 								status: "fileDeleted"
 							});
 						} else {
 							res.send({
-								status: "error"
+								status: "error",
+								message: "Could not delete the file"
 							});
 						}
 					});
@@ -172,26 +188,23 @@ exports.deleteFile = function(req, res) {
 	})
 };
 
+
+/*
+* Return userExist and the file that the user have
+*/
 exports.checkUser = function(req, res) {
 	var params = req.body;
-	//checking user existence
-	var login=params.login;
-	var key =params.key;
-	if(login == "" || key == ""){
-		res.send({
-					status: "invalidCredentials"
-				});
+	if(!credentialsSet(params, res)) {
 		return;
 	}
-	var userNamespace = "user:" + login;
-	client.get(userNamespace, function(err, reply) {
+	client.get(getUserNameSpace(params), function(err, reply) {
 		if(!reply) {
 			res.send({
 				status: "userDontExist"
 			});
 		} else {
 			if(reply == params.key) {
-				pathsNamespace = userNamespace + ":*"
+				pathsNamespace = getUserNameSpace(params) + ":*"
 				client.keys(pathsNamespace, function(err, reply) {
 					var paths = reply;
 					for(var i = paths.length - 1; i >= 0; i--) {
@@ -211,80 +224,35 @@ exports.checkUser = function(req, res) {
 	})
 };
 
+
+/**
+ * Create a user and a new empty file for a user
+ */
 exports.createUser = function(req, res) {
 	var params = req.body;
 	//checking user existence
-	var login=params.login;
-	var key=params.key;
-	if(login =="" || key == ""){
-		res.send({
-					status: "invalidCredentials"
-				});
+	if(!credentialsSet(params, res)) {
 		return;
 	}
-	var userNamespace = "user:" + login;
-	client.get(userNamespace, function(err, reply) {
-		client.set(userNamespace, params.key, function(err, reply) {
-			if(!reply) {
-				res.send({
-					status: "error"
-				});
-			} else {
-				var homeNameSpace = userNamespace + ":Home";
+	client.get(getUserNameSpace(params), function(err, reply) {
+		if(!reply) {
+			client.set(getUserNameSpace(params), params.key, function(err, reply) {
+				//create a doc for a new user
+				var homeNameSpace = getUserNameSpace(params) + ":Home";
 				console.log("creating home: " + homeNameSpace);
+				// x as a value because it won't be allocated if empty
 				client.set(homeNameSpace, "x", function(err, reply) {
 					console.log("home creation response: " + reply)
 					res.send({
 						status: "userCreated",
 					});
 				});
-
-			}
-		})
+			})
+		} else {
+			res.send({
+				status: "error",
+				message: "trying to create a user that already exist"
+			});
+		}
 	});
 };
-
-exports.load = function(req, res) {
-	var params = req.body;
-	//checking user existence
-	var login=params.login;
-	var key= params.key;
-	if(login =="" || key == ""){
-		res.send({
-					status: "invalidCredentials"
-				});
-		return;
-	}
-	var userNamespace = "user:" + login
-	client.get(userNamespace, function(err, reply) {
-		if(!reply) {
-			res.send({
-				status: "userDontExist"
-			});
-		} else {
-			if(reply != key) {
-				res.send({
-					status: "invalidCredentials"
-				});
-			}
-			var contentPath = userNamespace + ":" + params.path
-			console.log("loading path:" + contentPath)
-			client.get(contentPath, function(err, reply) {
-				if(reply) {
-					res.send({
-						status: "fileLoaded",
-						content: reply,
-						path: params.path
-					});
-				} else {
-					res.send({
-						status: "fileDontExist"
-					});
-				}
-			})
-
-		}
-	})
-};
-
-

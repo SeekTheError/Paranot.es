@@ -87,7 +87,7 @@ var pn = function($, CryptoJS) {
 
 			/*
 			 * variable to prevent data loss or multiple load
-			 * activate autosave when the input area lose focus 
+			 * activate autosave when the input area lose focus
 			 *( before changing doc, Signout,switching tab,etc)
 			 */
 			Store.inputSync = true;
@@ -115,7 +115,7 @@ var pn = function($, CryptoJS) {
 			 * Save button for tactile interfaces
 			 */
 			$('#save').click(function(event) {
-				event.preventDefault();	
+				event.preventDefault();
 				console.log("SAVE");
 				if(Store.inputSync) {
 					save();
@@ -132,11 +132,11 @@ var pn = function($, CryptoJS) {
 				$('#newFileName').html("").focus();
 				return false;
 			});
-		
+
 
 			/**
-			* Auto save when the content is modified
-			*/
+			 * Auto save when the content is modified
+			 */
 
 			//the time the user has to stop typing for the saved to be performed
 			var TIME_OUT_VALUE = 1000;
@@ -150,16 +150,16 @@ var pn = function($, CryptoJS) {
 					$("#saveStatus").html("Saving");
 				};
 				if(Store.saveStatus == "IS_TYPING") {
-					//this variable will show whether the content has been modified after the call to
+					//this variable will show weither the content has been modified after the call to
 					//setTimeout. If not it will be saved. Without this, every keyUp event will trigger a save
 					var lastInputContent = $("#input").html();
 					setTimeout(function() {
 						var inputContent = $("#input").html();
 						if(inputContent == lastInputContent && Store.lastSavedInput != inputContent) {
 							Store.saveStatus = "DONE_TYPING";
-							Store.lastSavedInput=inputContent;
+							Store.lastSavedInput = inputContent;
 							save();
-							
+
 						} else {
 							return;
 						}
@@ -209,7 +209,7 @@ var pn = function($, CryptoJS) {
 			});
 		}
 
-		
+
 		/*
 		 * Load a file
 		 */
@@ -244,7 +244,7 @@ var pn = function($, CryptoJS) {
 
 
 		/*
-		 * Method to save the note on the current path on the server
+		 * Method to save the current note on the server
 		 */
 
 		function save() {
@@ -269,7 +269,7 @@ var pn = function($, CryptoJS) {
 				path: path,
 				content: content
 			}
-			
+
 			$.ajax({
 				url: url,
 				type: 'POST',
@@ -290,11 +290,13 @@ var pn = function($, CryptoJS) {
 			var pass = $("#pass").val();
 			var key = CryptoJS.SHA1(login + pass).toString();
 
-			var url = "/createFile";
+			var url = "/save";
 			var data = {
 				login: encodeURIComponent(login),
 				key: encodeURIComponent(key),
 				path: encodeURIComponent(path),
+				content: "x",
+				newFile : true
 			}
 			$.ajax({
 				url: url,
@@ -401,11 +403,11 @@ var pn = function($, CryptoJS) {
 				input.innerHTML = result.toString();
 
 				// init the autosave function for the new note
-				Store.lastSavedInput=result.toString();
+				Store.lastSavedInput = result.toString();
 				$("#input").data('path', response.path);
 				console.log("Loaded");
 				//this prevent a reload when the .focus method is called
-				Store.inputSync=true;
+				Store.inputSync = true;
 				$("#input").focus();
 			}
 		}
@@ -413,6 +415,7 @@ var pn = function($, CryptoJS) {
 		/*
 		 *load or reload the tabs, and load
 		 */
+
 		function initUserInterface(tabs) {
 			console.log("init User Interface", tabs)
 			$("#inputs-navs").html("");
@@ -445,53 +448,70 @@ var pn = function($, CryptoJS) {
 		/*
 		 *Route Event originated from a server response
 		 */
+
 		function dispatch(response) {
-			console.log("dispatcher: ", response);
+			if(response.status == "fileLoaded") {
+				displayContent(response);
+				return;
+			}
+
+			if(response.status == "fileSaved") {
+				$("#saveStatus").html("Saved");
+				return;
+			}
+
 			if(response.status == "userCreated") {
 				console.log("userCreated");
 				checkUser();
+				return;
 			}
 
 			if(response.status == "userExist") {
 				console.log("User Exist");
 				initUserInterface(response.paths);
+				return;
 			}
 			if(response.status == "userDontExist") {
 				var create = confirm("This account does not exist, do you want to create it?");
 				if(create) {
 					createUser();
 				}
-			}
-
-			if(response.status == "fileSaved"){
-				$("#saveStatus").html("Saved");
+				return;
 			}
 
 			if(response.status == "fileCreated") {
 				console.log("File successfully created");
 				checkUser();
+				return;
 			}
 			if(response.status == "fileAlreadyExist") {
 				window.alert("This File name is already taken");
+				return;
 			}
 
 			if(response.status == "fileDontExist") {
 				console.log(response);
+				return;
 			}
-			if(response.status == "fileLoaded") {
-				displayContent(response);
-			}
+
 			if(response.status == "invalidCredentials") {
 				$(".command").hide();
 				window.alert("Invalid Password");
+				return;
 			}
 			if(response.status == "invalidFileName") {
 				window.alert("Invalid FileName");
 				$('#newFileName').html('<i>New Note</i>');
+				return;
 			}
 			if(response.status == "fileDeleted") {
 				$("#input").data('path', null);
 				checkUser();
+				return;
+			}
+			if(response.status == "error") {
+				console.error(response.message);
+				return;
 			}
 		}
 
