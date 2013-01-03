@@ -28,8 +28,10 @@ var pn = function($, CryptoJS) {
 		 * Event originated from the user interface
 		 */
 		this.init = function() {
-			$("#connect").click(function() {
+			$("#connect").click(function(event) {
+				event.preventDefault();
 				checkUser();
+				return false;
 			});
 			$("#login").keypress(function(event) {
 				if(!(event.which == 13)) {
@@ -40,6 +42,18 @@ var pn = function($, CryptoJS) {
 					return false;
 				}
 			});
+
+			//trigger the user verification when the enter key is pressed
+			$("#pass").keypress(function(event) {
+				if(!(event.which == 13)) {
+					return true;
+				} else {
+					event.preventDefault();
+					checkUser();
+					return false;
+				}
+			});
+
 			// there is no cookie and no form, so reloading the page will log out
 			$("#logout").click(function() {
 				window.location = ""
@@ -80,10 +94,7 @@ var pn = function($, CryptoJS) {
 
 				return false;
 			});
-			//trigger the user verification when the enter key is pressed
-			$("#pass").change(function() {
-				checkUser()
-			});
+
 
 			/*
 			 * variable to prevent data loss or multiple load
@@ -296,7 +307,7 @@ var pn = function($, CryptoJS) {
 				key: encodeURIComponent(key),
 				path: encodeURIComponent(path),
 				content: "x",
-				newFile : true
+				newFile: true
 			}
 			$.ajax({
 				url: url,
