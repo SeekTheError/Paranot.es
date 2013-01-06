@@ -1,16 +1,11 @@
-var encrypted = CryptoJS.AES.encrypt("Message", "Secret Passphrase");
-s = encrypted.toString()
-//console.log(s);
-var decrypted = CryptoJS.AES.decrypt(s, "Secret Passphrase");
-r = CryptoJS.enc.Utf8.stringify(decrypted);
-//console.log(r);
+
 /**
 * login : the user login
   pass : the user pass, used for aes encryption
   path : the path of the file
   key : the sha1 of login+pass, used as an index in the local store
 */
-var pn = function($, CryptoJS) {
+var pn = function() {
 		if(!$ || !CryptoJS) {
 			console.error("Missing Dependencies");
 		}
@@ -179,6 +174,20 @@ var pn = function($, CryptoJS) {
 
 			});
 
+
+			/*
+			 *handle ctrl+s to save the #input
+			 */
+			$("#input").live('keypress', function(event) {
+				if(!(event.which == 115 && event.ctrlKey) && !(event.which == 19)) {
+					return true;
+				} else {
+					save();
+					event.preventDefault();
+					return false;
+				}
+			});
+
 			/*
 			 * Create a file when enter is pressed
 			 */
@@ -206,32 +215,24 @@ var pn = function($, CryptoJS) {
 				return false;
 			})
 
-			/*
-			 *handle ctrl+s to save the # input
-			 */
-			$("#input").live('keypress', function(event) {
-				if(!(event.which == 115 && event.ctrlKey) && !(event.which == 19)) {
-					return true;
-				} else {
-					save();
-					event.preventDefault();
-					return false;
-				}
-			});
+
 		}
 
 
 		/*
 		 * Load a file
+		 * exposed
+		 * path: an optional path (not used internally)
 		 */
 
-		function load() {
+		this.load = function(path) {
 			$("#input").hide();
 			var login = $("#login").val();
 			var pass = $("#pass").val();
 			//The path if a tab is "clicked"
-			var path = encodeURIComponent($("#inputs-navs li.active a.file").html());
-
+			if(!path) {
+				var path = encodeURIComponent($("#inputs-navs li.active a.file").html());
+			}
 			if(typeof path == "undefined") {
 				console.log("aborting, cause: nothing to load")
 			}
@@ -256,9 +257,10 @@ var pn = function($, CryptoJS) {
 
 		/*
 		 * Method to save the current note on the server
+		 * exposed
 		 */
 
-		function save() {
+		this.save = function() {
 			var input = document.getElementById('input').innerHTML;
 			var login = $("#login").val();
 			var pass = $("#pass").val();
@@ -280,7 +282,7 @@ var pn = function($, CryptoJS) {
 				path: path,
 				content: content
 			}
-
+			$("#saveStatus").html("Saving");
 			$.ajax({
 				url: url,
 				type: 'POST',
@@ -404,7 +406,7 @@ var pn = function($, CryptoJS) {
 			if(response) {
 				$("#input").show();
 				$("#input").attr('contenteditable', 'true');
-				console.log("displaying", response)
+				//console.log("displaying", response)
 				console.log("displaying: " + response.path);
 				var source = response.content
 				var pass = $("#pass").val();
@@ -468,6 +470,7 @@ var pn = function($, CryptoJS) {
 
 			if(response.status == "fileSaved") {
 				$("#saveStatus").html("Saved");
+				console.info("saved");
 				return;
 			}
 
@@ -528,4 +531,4 @@ var pn = function($, CryptoJS) {
 
 		return this;
 
-	}(jQuery, CryptoJS)
+	}()
