@@ -10,27 +10,6 @@
 <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 <link href="/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
 <link rel='stylesheet' href='/stylesheets/style.css' />
-<!-- Scripts -->
-<script src="/javascripts/vendor/jquery.js"></script>
-<script src="/bootstrap/js/bootstrap.js"></script>
-
-<script src="/javascripts/vendor/cryptojs/sha1.js"></script>
-<script src="/javascripts/vendor/cryptojs/aes.js"></script>
-<script src="/javascripts/pn.js"></script>
-<script>	
-	$(document).ready(function() {
-		// IE "console"
-		if (!window.console || !console) {
-			window.console = {};
-			window.console.log = function() {}
-			window.console.error = function(){}
-      window.console.info = function(){}
-		}
-    $(".command").hide();
-		pn.init();
-    //$("#login").focus();
-	});
-</script>
 <!--[if lt IE 9]>
       <script> alert("This website is not compatible with your browser yet");</script>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -106,5 +85,26 @@
       <a href="https://github.com/SeekTheError/Paranot.es">https://github.com/SeekTheError/Paranot.es</a><br/>
   </div>
 </div>
+<!-- Scripts -->
+<script src="/javascripts/vendor/jquery.js"></script>
+<script src="/bootstrap/js/bootstrap.js"></script>
+<script src="/javascripts/vendor/cryptojs/sha1.js"></script>
+<script src="/javascripts/vendor/cryptojs/aes.js"></script>
+<script src="/javascripts/pn.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>  
+  $(document).ready(function() {
+    // IE "console"
+    if (!window.console || !console) {
+      window.console = {};
+      window.console.log = function() {}
+      window.console.error = function(){}
+      window.console.info = function(){}
+    }
+    $(".command").hide();
+    pn.init();
+    //$("#login").focus();
+  });
+</script>
 </body>
 </html>
