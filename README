@@ -13,3 +13,6 @@ you need nodejs, npm and the redis server to run the application
 once it's install , simply use  node app.js and open your browser on "localhost:3000"
 
 
+Branch : Sync
+refactoring the app using socket.io
+
