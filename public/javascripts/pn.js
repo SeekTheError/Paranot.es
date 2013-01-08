@@ -1,4 +1,3 @@
-
 /**
 * login : the user login
   pass : the user pass, used for aes encryption
@@ -6,10 +5,9 @@
   key : the sha1 of login+pass, used as an index in the local store
 */
 var pn = function() {
-		if(!$ || !CryptoJS) {
+		if(!$ || !CryptoJS || !Socket) {
 			console.error("Missing Dependencies");
 		}
-
 		// a way to scope some variables at the pn object level;
 		var Store = {};
 
@@ -18,7 +16,6 @@ var pn = function() {
 		 *	on reload to display the reloaded file
 		 */
 		Store.nextPath = null;
-
 		/*
 		 * Event originated from the user interface
 		 */
@@ -98,7 +95,7 @@ var pn = function() {
 			 */
 			Store.inputSync = true;
 
-
+			/*
 			$("#input").focusout(function(event) {
 				event.preventDefault();
 				if(Store.inputSync) {
@@ -110,6 +107,7 @@ var pn = function() {
 			/*
 			 *activate autoload when the input gain focus
 			 */
+			 /*
 			$("#input").focusin(function(event) {
 				if(!Store.inputSync) {
 					Store.inputSync = true;
@@ -214,8 +212,6 @@ var pn = function() {
 				}
 				return false;
 			})
-
-
 		}
 
 
@@ -234,7 +230,7 @@ var pn = function() {
 				var path = encodeURIComponent($("#inputs-navs li.active a.file").html());
 			}
 			if(typeof path == "undefined") {
-				console.log("aborting, cause: nothing to load")
+				console.log("aborting, cause: nothing path to load")
 			}
 			var key = CryptoJS.SHA1(login + pass).toString();
 			var url = "load";
@@ -244,14 +240,7 @@ var pn = function() {
 				key: encodeURIComponent(key),
 				path: path,
 			}
-			console.log("loading on" + url)
-			$.ajax({
-				url: url,
-				type: 'POST',
-				data: data
-			}).done(function(data) {
-				dispatch(data);
-			})
+			Socket.emit("loadFile",data);
 		}
 
 
@@ -283,13 +272,14 @@ var pn = function() {
 				content: content
 			}
 			$("#saveStatus").html("Saving");
-			$.ajax({
+			Socket.emit('saveFile', data);
+			/*$.ajax({
 				url: url,
 				type: 'POST',
 				data: data
 			}).done(function(data) {
 				dispatch(data);
-			})
+			})*/
 
 		}
 
@@ -463,17 +453,6 @@ var pn = function() {
 		 */
 
 		function dispatch(response) {
-			if(response.status == "fileLoaded") {
-				displayContent(response);
-				return;
-			}
-
-			if(response.status == "fileSaved") {
-				$("#saveStatus").html("Saved");
-				console.info("saved");
-				return;
-			}
-
 			if(response.status == "userCreated") {
 				console.log("userCreated");
 				checkUser();
@@ -529,6 +508,66 @@ var pn = function() {
 			}
 		}
 
+		Socket.on("fileLoaded", function(data) {
+			displayContent(data);
+		});
+
+		Socket.on("userCreated", function() {
+			console.log("userCreated");
+			checkUser();
+		});
+
+		Socket.on("userExist", function() {
+			console.log("User Exist");
+			initUserInterface(response.paths);
+		});
+		Socket.on("userDontExist", function() {
+			var create = confirm("This account does not exist, do you want to create it?");
+			if(create) {
+				createUser();
+			}
+		});
+
+		Socket.on("fileCreated", function() {
+			console.log("File successfully created");
+			checkUser();
+		});
+		Socket.on("fileAlreadyExist", function() {
+			window.alert("This File name is already taken");
+		});
+
+		Socket.on("fileDontExist", function() {
+			console.log(response);
+		});
+
+		Socket.on("invalidCredentials", function() {
+			$(".command").hide();
+			window.alert("Invalid Password");
+		});
+		Socket.on("invalidFileName", function() {
+			window.alert("Invalid FileName");
+			$('#newFileName').html('<i>New Note</i>');
+		});
+		Socket.on("fileDeleted", function() {
+			$("#input").data('path', null);
+			checkUser();
+		});
+
+		Socket.on("error", function() {
+			console.error(response.message);
+		});
+
+		Socket.on("fileSaved", function(data) {
+			$("#saveStatus").html("Saved");
+			console.info("saved");
+		});
+		Socket.on("invalidFileName", function(data) {
+			$window.alert("Invalid FileName");
+			$('#newFileName').html('<i>New Note</i>');
+		});
+
+
+
 		return this;
 
-	}()
+	}

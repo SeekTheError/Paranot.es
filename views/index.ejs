@@ -51,7 +51,7 @@
 <div class="row-fluid">
   <div class="span8">
     <ul id="inputs-navs" class="nav nav-tabs">
-      <li class="active"><a href="#welcome" data-toggle="tab">Welcome!</a></li>
+      <li class="active"><a href="#welcome" data-toggle="tab"><h3>Welcome!</h3></a></li>
     </ul>
 </div>
 <div class="span4">
@@ -66,23 +66,32 @@
   </div>
   <div>
   <div id="input" contenteditable="false">
-      Paranot.es is a simple application that allow you to store Notes on the web.<br/>
-      <br/>
+      <p><br/>
+      Paranot.es is a simple application that allow you to store Notes on the web.
+    </p>
+      <h3>2 seconds setup</h3>
+      <p>
       To start, enter a login and a password, and if the username is available, you will be able to create an account instantly.<br/>
-      <br/>
-      You can edit any note by simply clicking it.<br/>
-      The save is performed either if the text input loose focus or if you press ctrl+s(the common save shortcut).<br/>
-      Every notes are encrypted directly on your browser, so we never send the clear data on the network.<br/>
-      <br/>
-      Your password is the decryption key, and we never send it to the server either for maximum security.<br>
-      That mean one thing: if you loose your password, you loose your account and thus your files, so keep it safe.<br/>
-      <br/>
-      If you need a good password idea, read this <a href="http://xkcd.com/936/">XKCD comics</a>.<br/>
+      </p>
+      <h3>Easy to use</h3>
+      <p>
+      You can edit any note by simply clicking it.
+      The save is performed automatically.<br/>
+    </p>
+      <h3>And secure</h3>
+      <p>
+      Every note is encrypted directly on your browser, so we never send any clear data on the network.
+      Your password is the decryption key, and we never send it to the server either for maximum security.
+      <em>Even the administrator of this server do not know what you wrote.</em><br/><br/>
+      That mean one thing: <em>if you loose your password, you loose your account and thus your files, so keep it safe.</em>
+      <br>
+      If you need a good password idea, you can read this <a href="http://xkcd.com/936/">XKCD comics</a>.<br/>
       <br/>
       <b>THIS IS A DEMO VERSION,  DO NOT TRUST THIS SITE YET </b>
       <br/>
       This website is open source, you can check the code at 
       <a href="https://github.com/SeekTheError/Paranot.es">https://github.com/SeekTheError/Paranot.es</a><br/>
+    </p>
   </div>
 </div>
 <!-- Scripts -->
@@ -90,7 +99,6 @@
 <script src="/bootstrap/js/bootstrap.js"></script>
 <script src="/javascripts/vendor/cryptojs/sha1.js"></script>
 <script src="/javascripts/vendor/cryptojs/aes.js"></script>
-<script src="/javascripts/pn.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>  
   $(document).ready(function() {
@@ -102,9 +110,16 @@
       window.console.info = function(){}
     }
     $(".command").hide();
-    pn.init();
+    Socket = io.connect('http://localhost');
+    Socket.on('connected', function (data) {
+      //way to resolve dependency
+      pn().init();
+      console.log("socket.io: ",data);
+          });
+    
     //$("#login").focus();
   });
 </script>
+<script src="/javascripts/pn.js"></script>
 </body>
 </html>

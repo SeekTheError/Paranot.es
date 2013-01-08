@@ -5,13 +5,12 @@
 var cluster = require('cluster');
 var numCPUs = require('os').cpus().length;
 
-//min number on cpu  
-numCPUs == 1 ? numCPUs = 2 : '';
+//min number of worker 
+numCPUs == 1 ? numCPUs = 2 :'';
 
 // code for handling worker, one by cpu unit
 if(cluster.isMaster) {
   var timeouts = [];
-
   function errorMsg(worker) {
     console.error("Something must be wrong with the connection ... " + (worker ? worker.id : ''));
     console.log()
@@ -58,7 +57,7 @@ else {
   port = process.argv[2];
 
   app.configure(function() {
-    app.set('port', port || 3000);
+    app.set('port', port || 80);
     app.set('views', __dirname + '/views');
     app.set('view engine', 'ejs');
     app.use(express.favicon());
@@ -94,8 +93,10 @@ else {
   var RedisStore = require('socket.io/lib/stores/redis'),
     redis = require('socket.io/node_modules/redis'),
     pub = redis.createClient(redisPort, redisHost),
-    sub = redis.createClient(redisPort, redisHost),
-    client = redis.createClient(redisPort, redisHost);
+    sub = redis.createClient(redisPort, redisHost);
+
+  //global redis client
+  client = redis.createClient(redisPort, redisHost);
 
   /*pub.auth(password, function (err) { if (err) throw err; });
 sub.auth(password, function (err) { if (err) throw err; });
@@ -108,5 +109,5 @@ client.auth(password, function (err) { if (err) throw err; });*/
     redisClient: client
   }));
 
-  require("./socketio/rt.js");
+var realtime=require('./realtime/rt.js');
 }
