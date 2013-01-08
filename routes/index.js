@@ -35,7 +35,6 @@ function credentialsSet(params, res) {
 /*
 * Check
 */
-
 function pathSet(params,res){
 	if(params.path == "" ) {
 		res.send({
@@ -60,87 +59,6 @@ function getUserNameSpace(params) {
 function getContentPath(params) {
 	return "user:" + params.login + ":" + params.path;
 }
-
-/*
-* Create or save an existing file
-*/
-exports.save = function(req, res) {
-	var params = req.body;
-	if(!credentialsSet(params, res)) {
-		return;
-	}
-	if(!pathSet(params)) {
-		return;
-	}
-
-	client.get(getUserNameSpace(params), function(err, reply) {
-		if(!reply) {
-			res.send({
-				status: "userDontExist"
-			});
-		} else {
-			if(reply != params.key) {
-				res.send({
-					status: "refused"
-				});
-				return;
-			}
-			client.set(getContentPath(params), params.content, function(err, reply) {
-				if(reply) {
-					var status=params.newFile?"fileCreated":"fileSaved";
-					res.send({
-						status: status
-					});
-				} else {
-					res.send({
-						status: "error",
-						message: "troube while saving"
-					});
-				}
-			})
-		}
-	})
-};
-
-
-exports.load = function(req, res) {
-	var params = req.body;
-	if(!credentialsSet(params, res)) {
-		return;
-	}
-	if(!pathSet(params)) {
-		return;
-	}
-
-	client.get(getUserNameSpace(params), function(err, reply) {
-		if(!reply) {
-			res.send({
-				status: "userDontExist"
-			});
-		} else {
-			if(reply != params.key) {
-				res.send({
-					status: "invalidCredentials"
-				});
-				return;
-			}
-			client.get(getContentPath(params), function(err, reply) {
-				if(reply) {
-					res.send({
-						status: "fileLoaded",
-						content: reply,
-						path: params.path
-					});
-				} else {
-					res.send({
-						status: "fileDontExist"
-					});
-				}
-			})
-
-		}
-	})
-};
 
 exports.deleteFile = function(req, res) {
 	var params = req.body;
@@ -171,6 +89,7 @@ exports.deleteFile = function(req, res) {
 							res.send({
 								status: "fileDeleted"
 							});
+							io.sockets.in(getUserNameSpace(params)).emit('fileDeleted');
 						} else {
 							res.send({
 								status: "error",

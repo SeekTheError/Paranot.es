@@ -74,8 +74,6 @@ else {
   });
 
   app.get('/', routes.index);
-  app.post('/save', routes.save);
-  app.post('/load', routes.load);
   app.post('/createUser', routes.createUser);
   app.post('/checkUser', routes.checkUser);
   app.post('/deleteFile', routes.deleteFile);

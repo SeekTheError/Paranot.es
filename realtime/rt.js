@@ -1,4 +1,3 @@
-console.log("loadding socketio");
 
 io.sockets.on('connection', function(socket) {
 	socket.emit('connected', {
@@ -6,7 +5,7 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('saveFile', function(data) {
-		if (!guard(socket, data)) return ;
+		if(!guard(socket, data)) return;
 		client.get(getUserNameSpace(data), function(err, reply) {
 			if(!reply) {
 				socket.emit("userDontExist");
@@ -14,25 +13,32 @@ io.sockets.on('connection', function(socket) {
 				if(reply != data.key) {
 					socket.emit("refused");
 				} else {
-					client.set(getContentPath(data), data.content, function(err, reply) {
-						if(reply) {
-							socket.broadcast.to(getContentPath(data)).emit('fileUpdated');
-							var status = data.newFile ? "fileCreated" : "fileSaved";
-							socket.emit(status)
+					client.get(getContentPath(data), function(err, reply) {
+						if(reply && data.newFile) {
+							socket.emit("fileAlreadyExist");
 						} else {
-							socket.emit({
-								status: "error",
-								message: "troube while saving"
+							client.set(getContentPath(data), data.content, function(err, reply) {
+								if(reply) {
+									var status = data.newFile ? "fileCreated" : "fileSaved";
+									socket.broadcast.to(getContentPath(data)).emit('fileUpdated');
+									status == "fileCreated" ? socket.broadcast.to(getUserNameSpace(data)).emit("fileCreated") : "";
+									socket.emit(status)
+								} else {
+									socket.emit({
+										status: "error",
+										message: "troube while saving"
+									});
+								}
 							});
 						}
 					});
 				}
 			}
-		})
+		});
 	});
 
 	socket.on("loadFile", function(data) {
-		if (!guard(socket, data)) return ;
+		if(!guard(socket, data)) return;
 		client.get(getUserNameSpace(data), function(err, reply) {
 			if(!reply) {
 				socket.emit("userDontExist");
@@ -41,7 +47,10 @@ io.sockets.on('connection', function(socket) {
 					socket.emit("invalidCredentials");
 				} else {
 					//removing old room for the socket
-					socket.namespace.manager.rooms={};
+					console.log(socket.id, "leaving all room");
+					socket.namespace.manager.rooms = {};
+					socket.join(getUserNameSpace(data));
+					console.log(socket.id, "joining room ", getUserNameSpace(data));
 					client.get(getContentPath(data), function(err, reply) {
 						if(reply) {
 							//join the new room
@@ -58,8 +67,6 @@ io.sockets.on('connection', function(socket) {
 			}
 		})
 	});
-
-
 });
 
 //helper functions
@@ -93,10 +100,10 @@ function pathSet(params, res) {
 function getUserNameSpace(params) {
 	return "user:" + params.login;
 }
+
 /*
  * return the contentPath, witch is the redis key to a specific note
  */
-
 function getContentPath(params) {
 	return "user:" + params.login + ":" + params.path;
 }
