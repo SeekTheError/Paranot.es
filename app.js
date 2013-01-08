@@ -6,11 +6,12 @@ var cluster = require('cluster');
 var numCPUs = require('os').cpus().length;
 
 //min number of worker 
-numCPUs == 1 ? numCPUs = 2 :'';
+numCPUs == 1 ? numCPUs = 2 : '';
 
 // code for handling worker, one by cpu unit
 if(cluster.isMaster) {
   var timeouts = [];
+
   function errorMsg(worker) {
     console.error("Something must be wrong with the connection ... " + (worker ? worker.id : ''));
     console.log()
@@ -79,7 +80,7 @@ else {
   app.post('/deleteFile', routes.deleteFile);
 
 
-  var server=http.createServer(app).listen(app.get('port'), function() {
+  var server = http.createServer(app).listen(app.get('port'), function() {
     console.log("Express server listening on port " + app.get('port'));
   });
 
@@ -102,21 +103,20 @@ else {
 sub.auth(password, function (err) { if (err) throw err; });
 client.auth(password, function (err) { if (err) throw err; });*/
 
-io.configure( function(){
-  io.enable('browser client minification');  // send minified client
-  io.enable('browser client etag');          // apply etag caching logic based on version number
-  io.enable('browser client gzip');          // gzip the file
-  io.set('log level', 1);                    // reduce logging
-  io.set('transports', [                     // enable all transports (optional if you want flashsocket)
-      'websocket'
-    , 'flashsocket'
-    , 'htmlfile'
-    , 'xhr-polling'
-    , 'jsonp-polling'
-  ]);
-  var RedisStore = require('socket.io/lib/stores/redis');
-  io.set('store', new RedisStore({redisPub:pub, redisSub:sub, redisClient:store}));
-});
+  io.configure(function() {
+    io.enable('browser client minification'); // send minified client
+    io.enable('browser client etag'); // apply etag caching logic based on version number
+    io.enable('browser client gzip'); // gzip the file
+    io.set('log level', 1); // reduce logging
+    io.set('transports', [ // enable all transports (optional if you want flashsocket)
+    'websocket', 'flashsocket', 'htmlfile', 'xhr-polling', 'jsonp-polling']);
+    var RedisStore = require('socket.io/lib/stores/redis');
+    io.set('store', new RedisStore({
+      redisPub: pub,
+      redisSub: sub,
+      redisClient: store
+    }));
+  });
 
-var realtime=require('./realtime/rt.js');
+  var realtime = require('./realtime/rt.js');
 }

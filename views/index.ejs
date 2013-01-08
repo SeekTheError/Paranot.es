@@ -111,12 +111,13 @@
       window.console.info = function(){}
     }
     Socket = io.connect('http://localhost');
-    var pnInitialized = false;
+    
     Socket.on('connected', function (data) {
-      //TODO -> turn pn in a real object
-      if(!pnInitialized){pn().init();pnInitialized=true};
+      if(!PN.isInitialized){
+        var pn = new PN();
+      };
       console.log("socket.io: ",data);
-          });
+      });
   });
 </script>
 <script src="/javascripts/pn.js"></script>

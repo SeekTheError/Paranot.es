@@ -4,7 +4,8 @@
   path : the path of the file
   key : the sha1 of login+pass, used as an index in the local store
 */
-var pn = (function() {
+function PN() {
+
 	if(!$ || !CryptoJS || !Socket) {
 		console.error("Missing Dependencies");
 	}
@@ -16,14 +17,18 @@ var pn = (function() {
 	 *	on reload to display the reloaded file
 	 */
 	Store.nextPath = null;
-	var scope = this;
+
+
 	/*
 	 * Event originated from the user interface
 	 */
-	this.init = function() {
+
+	var pn=this;
+
+	(function(pn) {
 		$("#connect").click(function(event) {
 			event.preventDefault();
-			checkUser();
+			pn.checkUser();
 			return false;
 		});
 		$("#login").keypress(function(event) {
@@ -42,7 +47,7 @@ var pn = (function() {
 				return true;
 			} else {
 				event.preventDefault();
-				checkUser();
+				pn.checkUser();
 				return false;
 			}
 		});
@@ -57,7 +62,7 @@ var pn = (function() {
 			event.preventDefault();
 			document.getElementById("input").innerHTML = "";
 			Store.nextPath = $("#input").data("path");
-			checkUser();
+			pn.checkUser();
 			return false;
 		})
 		/**
@@ -66,7 +71,7 @@ var pn = (function() {
 		 */
 		$("#inputs-navs li a.file").live('click', function(event) {
 			event.preventDefault();
-			load();
+			pn.load();
 			return false;
 		})
 		/**
@@ -74,7 +79,6 @@ var pn = (function() {
 		 */
 		$('#deleteFile').live("click", function(event) {
 			event.preventDefault();
-
 			var fileName = $("#input").data('path');
 			if(!fileName) {
 				window.alert("Please select the file that you want to delete first");
@@ -82,9 +86,8 @@ var pn = (function() {
 			}
 			var toDelete = window.confirm("Are you sure that you want to delete the file " + decodeURIComponent(fileName));
 			if(toDelete) {
-				deleteFile();
+				pn.deleteFile();
 			}
-
 			return false;
 		});
 
@@ -96,7 +99,7 @@ var pn = (function() {
 		$("#input").focusout(function(event) {
 			event.preventDefault();
 			if(Store.inputSync) {
-				save();
+				pn.save();
 			}
 		});
 
@@ -107,7 +110,7 @@ var pn = (function() {
 			event.preventDefault();
 			console.log("SAVE");
 			if(Store.inputSync) {
-				save();
+				pn.save();
 				Store.inputSync = false;
 			}
 			return false;
@@ -131,7 +134,6 @@ var pn = (function() {
 		var TIME_OUT_VALUE = 300;
 		//the saveStatus var is used in the state machine
 		Store.saveStatus = "DONE_TYPING";
-
 		$("#input").keyup(function(e) {
 			Store.inputContent = $("#input").val();
 			if(Store.saveStatus == "DONE_TYPING") {
@@ -147,14 +149,13 @@ var pn = (function() {
 					if(inputContent == lastInputContent && Store.lastSavedInput != inputContent) {
 						Store.saveStatus = "DONE_TYPING";
 						Store.lastSavedInput = inputContent;
-						save();
+						pn.save();
 
 					} else {
 						return;
 					}
 				}, TIME_OUT_VALUE);
 			}
-
 		});
 
 
@@ -165,7 +166,7 @@ var pn = (function() {
 			if(!(event.which == 115 && event.ctrlKey) && !(event.which == 19)) {
 				return true;
 			} else {
-				save();
+				this.save();
 				event.preventDefault();
 				return false;
 			}
@@ -178,7 +179,7 @@ var pn = (function() {
 			if(!(event.which == 13)) {
 				return true;
 			} else {
-				createFile($('#newFileName').html());
+				this.createFile($('#newFileName').html());
 				event.preventDefault();
 				return false;
 			}
@@ -193,11 +194,11 @@ var pn = (function() {
 				$('#newFileName').html("");
 				$('#newFileName').focus();
 			} else {
-				createFile($('#newFileName').html());
+				this.createFile($('#newFileName').html());
 			}
 			return false;
 		})
-	}
+	})(this);
 
 
 	/*
@@ -233,7 +234,6 @@ var pn = (function() {
 	 * Method to save the current note on the server
 	 * exposed
 	 */
-
 	this.save = function() {
 		var input = document.getElementById('input').innerHTML;
 		var login = $("#login").val();
@@ -245,7 +245,6 @@ var pn = (function() {
 			console.log("abort, cause: no path");
 			return;
 		}
-
 		var content = CryptoJS.AES.encrypt(input, pass).toString();
 		var key = CryptoJS.SHA1(login + pass).toString();
 
@@ -258,10 +257,9 @@ var pn = (function() {
 		}
 		$("#saveStatus").html("Saving");
 		Socket.emit('saveFile', data);
-
 	}
 
-	function createFile(path) {
+	this.createFile = function(path) {
 		//setting the path to display
 		Store.nextPath = encodeURIComponent(path);
 		console.log("creating new file: " + path);
@@ -282,7 +280,7 @@ var pn = (function() {
 	}
 
 
-	function deleteFile() {
+	this.deleteFile = function() {
 		$("#input").html("");
 		var login = $("#login").val();
 		var pass = $("#pass").val();
@@ -310,7 +308,7 @@ var pn = (function() {
 	 * This method is called on user connection attempt
 	 */
 
-	function checkUser() {
+	this.checkUser = function() {
 		console.log("checking user");
 		var login = $("#login").val();
 		var pass = $("#pass").val();
@@ -337,7 +335,7 @@ var pn = (function() {
 		})
 	}
 
-	function createUser() {
+	this.createUser= function() {
 		console.log("creating user");
 		var login = $("#login").val();
 		var pass = $("#pass").val();
@@ -362,7 +360,7 @@ var pn = (function() {
 	 * Decrypt and display a note
 	 */
 
-	function displayContent(response) {
+	this.displayContent = function(response) {
 		if(response) {
 			$("#input").show();
 			$("#input").attr('contenteditable', 'true');
@@ -389,7 +387,7 @@ var pn = (function() {
 	 *load or reload the tabs, and load
 	 */
 
-	function initUserInterface(tabs) {
+	this.initUserInterface= function(tabs) {
 		console.log("init User Interface", tabs)
 		$("#inputs-navs").html("");
 		$(".command").show();
@@ -425,18 +423,18 @@ var pn = (function() {
 	function dispatch(response) {
 		if(response.status == "userCreated") {
 			console.log("userCreated");
-			checkUser();
+			pn.checkUser();
 			return;
 		}
 		if(response.status == "userExist") {
 			console.log("User Exist");
-			initUserInterface(response.paths);
+			pn.initUserInterface(response.paths);
 			return;
 		}
 		if(response.status == "userDontExist") {
 			var create = confirm("This account does not exist, do you want to create it?");
 			if(create) {
-				createUser();
+				pn.createUser();
 			}
 			return;
 		}
@@ -449,7 +447,7 @@ var pn = (function() {
 
 		if(response.status == "fileDeleted") {
 			$("#input").data('path', null);
-			checkUser();
+			pn.checkUser();
 			return;
 		}
 		if(response.status == "error") {
@@ -459,17 +457,17 @@ var pn = (function() {
 	}
 
 	Socket.on("fileLoaded", function(data) {
-		displayContent(data);
+		pn.displayContent(data);
 	});
 
 	Socket.on("userCreated", function() {
 		console.log("userCreated");
-		checkUser();
+		pn.checkUser();
 	});
 
 	Socket.on("userExist", function() {
 		console.log("User Exist");
-		initUserInterface(response.paths);
+		pn.initUserInterface(response.paths);
 	});
 	Socket.on("userDontExist", function() {
 		var create = confirm("This account does not exist, do you want to create it?");
@@ -480,7 +478,7 @@ var pn = (function() {
 
 	Socket.on("fileCreated", function() {
 		console.log("File successfully created");
-		checkUser();
+		pn.checkUser();
 	});
 	Socket.on("fileAlreadyExist", function() {
 		window.alert("This File name is already taken");
@@ -500,7 +498,7 @@ var pn = (function() {
 		$('#newFileName').html('<i>New Note</i>');
 	});
 	Socket.on("fileDeleted", function() {
-		checkUser();
+		pn.checkUser();
 	});
 
 	Socket.on("error", function() {
@@ -519,6 +517,4 @@ var pn = (function() {
 		console.log("file updated");
 		load();
 	});
-
-	return this;
-});
+}
