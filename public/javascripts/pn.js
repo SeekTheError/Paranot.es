@@ -515,6 +515,6 @@ function PN() {
 	});
 	Socket.on("fileUpdated", function(data) {
 		console.log("file updated");
-		load();
+		pn.load();
 	});
 }
