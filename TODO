@@ -1,18 +1,12 @@
 TODO
 
-state on load/save
-Bug on concurrent editing overriding change: "fixed", except form two browser if the focus stay on the browser that should update
+explicitely tell the user he is disconnected
 
-protect login from contening ":" > maybe not
+protect login from contening ":" > maybe not necessary
 External audit of the global security
 https
 
 
-autoload on create is broken
-conpat ipad
-
-bug
-	cr bug on chrome
 
 switch to modal instead of popups => not now
 big files? chrome crash around 2 mo => good enough
