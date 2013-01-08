@@ -16,6 +16,7 @@ io.sockets.on('connection', function(socket) {
 				} else {
 					client.set(getContentPath(data), data.content, function(err, reply) {
 						if(reply) {
+							socket.broadcast.to(getContentPath(data)).emit('fileUpdated');
 							var status = data.newFile ? "fileCreated" : "fileSaved";
 							socket.emit(status)
 						} else {
@@ -39,8 +40,12 @@ io.sockets.on('connection', function(socket) {
 				if(reply != data.key) {
 					socket.emit("invalidCredentials");
 				} else {
+					//removing old room for the socket
+					socket.namespace.manager.rooms={};
 					client.get(getContentPath(data), function(err, reply) {
 						if(reply) {
+							//join the new room
+							socket.join(getContentPath(data));
 							socket.emit("fileLoaded", {
 								content: reply,
 								path: data.path

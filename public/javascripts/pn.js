@@ -549,6 +549,10 @@ var pn = function() {
 			$window.alert("Invalid FileName");
 			$('#newFileName').html('<i>New Note</i>');
 		});
+		Socket.on("fileUpdated", function(data) {
+			console.log("file updated");
+			load();
+		});
 
 
 
