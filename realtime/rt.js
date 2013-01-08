@@ -6,16 +6,7 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('saveFile', function(data) {
-		console.log("saveFile", data);
-
-
-		if(!credentialsSet(data)) {
-			socket.emit("invalidCredentials");
-		}
-		if(!pathSet(data)) {
-			socket.emit("invalidFileName");
-		}
-
+		if (!guard(socket, data)) return ;
 		client.get(getUserNameSpace(data), function(err, reply) {
 			if(!reply) {
 				socket.emit("userDontExist");
@@ -40,12 +31,7 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on("loadFile", function(data) {
-		if(!credentialsSet(data)) {
-			socket.emit("invalidCredentials");
-		}
-		if(!pathSet(data)) {
-			socket.emit("invalidFileName");
-		}
+		if (!guard(socket, data)) return ;
 		client.get(getUserNameSpace(data), function(err, reply) {
 			if(!reply) {
 				socket.emit("userDontExist");
@@ -55,12 +41,10 @@ io.sockets.on('connection', function(socket) {
 				} else {
 					client.get(getContentPath(data), function(err, reply) {
 						if(reply) {
-							socket.emit("fileLoaded", 
-							{
+							socket.emit("fileLoaded", {
 								content: reply,
 								path: data.path
-							}
-							);
+							});
 						} else {
 							socket.emit("fileDontExist");
 						}
@@ -74,6 +58,18 @@ io.sockets.on('connection', function(socket) {
 });
 
 //helper functions
+
+function guard(socket, data) {
+	if(!credentialsSet(data)) {
+		socket.emit("invalidCredentials");
+		return false;
+	}
+	if(!pathSet(data)) {
+		socket.emit("invalidFileName");
+		return false;
+	}
+	return true;
+}
 
 function credentialsSet(params) {
 	if(params.login == "" || params.key == "") {

@@ -89,29 +89,13 @@ var pn = function() {
 
 
 			/*
-			 * variable to prevent data loss or multiple load
-			 * activate autosave when the input area lose focus
-			 *( before changing doc, Signout,switching tab,etc)
+			 * variable to prevent data loss when changing file
 			 */
-			Store.inputSync = true;
-
-			/*
+			
 			$("#input").focusout(function(event) {
 				event.preventDefault();
 				if(Store.inputSync) {
 					save();
-					Store.inputSync = false;
-				}
-				return false;
-			});
-			/*
-			 *activate autoload when the input gain focus
-			 */
-			 /*
-			$("#input").focusin(function(event) {
-				if(!Store.inputSync) {
-					Store.inputSync = true;
-					load();
 				}
 			});
 
@@ -143,7 +127,7 @@ var pn = function() {
 			 */
 
 			//the time the user has to stop typing for the saved to be performed
-			var TIME_OUT_VALUE = 1000;
+			var TIME_OUT_VALUE = 300;
 			//the saveStatus var is used in the state machine
 			Store.saveStatus = "DONE_TYPING";
 
@@ -570,4 +554,4 @@ var pn = function() {
 
 		return this;
 
-	}
+	};

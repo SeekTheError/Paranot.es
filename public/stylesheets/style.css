@@ -22,6 +22,8 @@ a {
 
 li.command{float:right;}
 
+.command{display: none;}
+
 div.content{
 margin-top: 5px;
 padding-right: 10px;

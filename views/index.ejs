@@ -96,10 +96,11 @@
 </div>
 <!-- Scripts -->
 <script src="/javascripts/vendor/jquery.js"></script>
+<script src="/socket.io/socket.io.js"></script>
 <script src="/bootstrap/js/bootstrap.js"></script>
 <script src="/javascripts/vendor/cryptojs/sha1.js"></script>
 <script src="/javascripts/vendor/cryptojs/aes.js"></script>
-<script src="/socket.io/socket.io.js"></script>
+
 <script>  
   $(document).ready(function() {
     // IE "console"
@@ -109,15 +110,13 @@
       window.console.error = function(){}
       window.console.info = function(){}
     }
-    $(".command").hide();
     Socket = io.connect('http://localhost');
+    var pnInitialized = false;
     Socket.on('connected', function (data) {
-      //way to resolve dependency
-      pn().init();
+      //TODO -> turn pn in a real object
+      if(!pnInitialized){pn().init();pnInitialized=true};
       console.log("socket.io: ",data);
           });
-    
-    //$("#login").focus();
   });
 </script>
 <script src="/javascripts/pn.js"></script>

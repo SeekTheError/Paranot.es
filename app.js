@@ -93,21 +93,32 @@ else {
   var RedisStore = require('socket.io/lib/stores/redis'),
     redis = require('socket.io/node_modules/redis'),
     pub = redis.createClient(redisPort, redisHost),
-    sub = redis.createClient(redisPort, redisHost);
+    sub = redis.createClient(redisPort, redisHost),
+    store = redis.createClient(redisPort, redisHost);
 
   //global redis client
   client = redis.createClient(redisPort, redisHost);
 
+  //no auth for now;
   /*pub.auth(password, function (err) { if (err) throw err; });
 sub.auth(password, function (err) { if (err) throw err; });
 client.auth(password, function (err) { if (err) throw err; });*/
 
-  io.set('store', new RedisStore({
-    redis: redis,
-    redisPub: pub,
-    redisSub: sub,
-    redisClient: client
-  }));
+io.configure( function(){
+  io.enable('browser client minification');  // send minified client
+  io.enable('browser client etag');          // apply etag caching logic based on version number
+  io.enable('browser client gzip');          // gzip the file
+  io.set('log level', 1);                    // reduce logging
+  io.set('transports', [                     // enable all transports (optional if you want flashsocket)
+      'websocket'
+    , 'flashsocket'
+    , 'htmlfile'
+    , 'xhr-polling'
+    , 'jsonp-polling'
+  ]);
+  var RedisStore = require('socket.io/lib/stores/redis');
+  io.set('store', new RedisStore({redisPub:pub, redisSub:sub, redisClient:store}));
+});
 
 var realtime=require('./realtime/rt.js');
 }
