@@ -110,7 +110,7 @@
       window.console.error = function(){}
       window.console.info = function(){}
     }
-    Socket = io.connect('http://localhost');
+    Socket = io.connect('/');
     
     Socket.on('connected', function (data) {
       if(!PN.isInitialized){
