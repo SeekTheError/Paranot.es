@@ -166,7 +166,7 @@ function PN() {
 			if(!(event.which == 115 && event.ctrlKey) && !(event.which == 19)) {
 				return true;
 			} else {
-				this.save();
+				pn.save();
 				event.preventDefault();
 				return false;
 			}
@@ -179,7 +179,7 @@ function PN() {
 			if(!(event.which == 13)) {
 				return true;
 			} else {
-				this.createFile($('#newFileName').html());
+				pn.createFile($('#newFileName').html());
 				event.preventDefault();
 				return false;
 			}
@@ -194,7 +194,7 @@ function PN() {
 				$('#newFileName').html("");
 				$('#newFileName').focus();
 			} else {
-				this.createFile($('#newFileName').html());
+				pn.createFile($('#newFileName').html());
 			}
 			return false;
 		})
