@@ -5,9 +5,6 @@
 var cluster = require('cluster');
 var numCPUs = require('os').cpus().length;
 
-//min number of worker 
-numCPUs == 1 ? numCPUs = 2 : '';
-
 // code for handling worker, one by cpu unit
 if(cluster.isMaster) {
   var timeouts = [];
