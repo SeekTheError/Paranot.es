@@ -6,7 +6,7 @@ This is the lib used for encryption:
 https://code.google.com/p/crypto-js/
 
 
-IN MAINTENANCE----You can see it live at http://paranot.es
+You can see it live at http://paranot.es
 
 To install:
 you need nodejs, npm and the redis server to run the application.
