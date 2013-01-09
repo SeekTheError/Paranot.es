@@ -410,9 +410,8 @@ function PN() {
 			$("#inputs-navs").append(nav);
 		};
 		//Autoload 
-		if(!empty && Store.nextPath) {
-			Store.nextPath = null;
-			load();
+		if(!empty) {
+			pn.load();
 		}
 	}
 
@@ -486,7 +485,7 @@ function PN() {
 
 	Socket.on("fileDontExist", function(data) {
 		console.log("file don't exist");
-		alert("This file have been remove");
+		//alert("This file have been remove");
 	});
 
 	Socket.on("invalidCredentials", function() {
