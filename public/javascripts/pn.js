@@ -197,7 +197,10 @@ function PN() {
 				pn.createFile($('#newFileName').html());
 			}
 			return false;
-		})
+		});
+
+		loadExtensions(pn);
+		console.log("pn is ready");
 	})(this);
 
 
@@ -516,4 +519,18 @@ function PN() {
 		console.log("file updated");
 		pn.load();
 	});
+
+}
+
+
+function loadExtensions(pn){
+console.log("Loading pn extensions");
+
+//allow to click links on the content editable
+(function (){
+$('#input a').live('click',function(event){event.preventDefault();var url=$(event.target).attr("href"); window.open(url, '_blank');
+  window.focus();})
+$('#input a').live('hover',function(){$('#input').attr("contenteditable",false)},function(){$('#input').attr("contenteditable",true)});
+})();
+
 }
