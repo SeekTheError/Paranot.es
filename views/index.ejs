@@ -113,7 +113,7 @@
     
     Socket.on('connected', function (data) {
       if(!PN.isInitialized){
-        var pn = new PN();
+        pn = new PN();
       };
       console.log("socket.io: ",data);
       });

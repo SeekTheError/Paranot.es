@@ -4,7 +4,7 @@
   path : the path of the file
   key : the sha1 of login+pass, used as an index in the local store
 */
-function PN() {
+PN = function() {
 
 	if(!$ || !CryptoJS || !Socket) {
 		console.error("Missing Dependencies");
@@ -24,6 +24,8 @@ function PN() {
 	 */
 
 	var pn=this;
+
+	this.isInitialized =false,
 
 	(function(pn) {
 		$("#connect").click(function(event) {
@@ -198,6 +200,7 @@ function PN() {
 			}
 			return false;
 		})
+		pn.isInitialized =true;
 	})(this);
 
 
