@@ -383,6 +383,7 @@ PN = function() {
 			// init the autosave function for the new note
 			Store.lastSavedInput = result.toString();
 			$("#input").data('path', response.path);
+			pn.currentPath=response.path;
 			console.log("Loaded");
 			//this prevent a reload when the .focus method is called
 			Store.inputSync = true;
@@ -532,9 +533,14 @@ console.log("Loading pn extensions");
 
 //allow to click links on the content editable
 (function (){
-$('#input a').live('click',function(event){event.preventDefault();var url=$(event.target).attr("href"); window.open(url, '_blank');
-  window.focus();})
-$('#input a').live('hover',function(){$('#input').attr("contenteditable",false)},function(){$('#input').attr("contenteditable",true)});
+	
+$('#input a').live('click',function(event){
+	if(!pn.currentPath) return;
+	event.preventDefault();var url=$(event.target).attr("href"); window.open(url, '_blank');
+   window.focus();})
+$('#input a').live('hover',function(){$('#input').attr("contenteditable",false)},function(){
+	if(!pn.currentPath) return;
+	$('#input').attr("contenteditable",true)});
 })();
 
 }
