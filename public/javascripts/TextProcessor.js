@@ -37,11 +37,17 @@ TextProcessor = (function() {
 	  function divise(content) {
 	  	var html="";
 	  	console.log(content);
+	  	try {
 		js=JSON.parse(content);
+		}catch(error){
+			return content;
+		}
 		TEST=js;
+		
 		for (var i in js) {
 			html+='<div>'+js[i].content+'</div>';
 		};
+		
 		console.log(js);
 		return html;
 	}]
