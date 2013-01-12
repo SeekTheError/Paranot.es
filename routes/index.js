@@ -160,12 +160,15 @@ exports.createUser = function(req, res) {
 				var homeNameSpace = getUserNameSpace(params) + ":Home";
 				console.log("creating home: " + homeNameSpace);
 				// x as a value because it won't be allocated if empty
+				/* DISABLED, TODO >because to re-enable the client must send an encoded <div>&npsp</div>
 				client.set(homeNameSpace, "x", function(err, reply) {
 					console.log("home creation response: " + reply)
-					res.send({
+					
+				});
+				*/
+				res.send({
 						status: "userCreated",
 					});
-				});
 			})
 		} else {
 			res.send({

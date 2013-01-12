@@ -133,7 +133,7 @@ PN = function() {
 		 */
 
 		//the time the user has to stop typing for the saved to be performed
-		var TIME_OUT_VALUE = 300;
+		var TIME_OUT_VALUE = 500;
 		//the saveStatus var is used in the state machine
 		Store.saveStatus = "DONE_TYPING";
 		$("#input").keyup(function(e) {
@@ -242,7 +242,7 @@ PN = function() {
 	 * exposed
 	 */
 	this.save = function() {
-		var input = document.getElementById('input').innerHTML;
+		var input = TextProcessor.getInput();
 		var login = $("#login").val();
 		var pass = $("#pass").val();
 		var path = $("#input").data('path');
@@ -252,10 +252,13 @@ PN = function() {
 			console.log("abort, cause: no path");
 			return;
 		}
+
+
 		var content = CryptoJS.AES.encrypt(input, pass).toString();
 		var key = CryptoJS.SHA1(login + pass).toString();
 
-		var url = "/save";
+		
+
 		var data = {
 			login: encodeURIComponent(login),
 			key: encodeURIComponent(key),
@@ -274,12 +277,15 @@ PN = function() {
 		var input = $("#input").html();
 		var login = $("#login").val();
 		var pass = $("#pass").val();
+		// init the content
+		var init=JSON.stringify([{i:1,content:"&nbsp;"}]);
+		var content = CryptoJS.AES.encrypt(init, pass).toString();
 		var key = CryptoJS.SHA1(login + pass).toString();
 		var data = {
 			login: encodeURIComponent(login),
 			key: encodeURIComponent(key),
 			path: encodeURIComponent(path),
-			content: "x",
+			content: content,
 			newFile: true
 		}
 		Socket.emit("saveFile", data);
@@ -373,13 +379,13 @@ PN = function() {
 			$("#input").attr('contenteditable', 'true');
 			//console.log("displaying", response)
 			console.log("displaying: " + response.path);
-			var source = response.content
+			 
 			var pass = $("#pass").val();
-			var raw = CryptoJS.AES.decrypt(source, pass);
+
+			var raw = CryptoJS.AES.decrypt(response.content, pass);
 			var result = CryptoJS.enc.Utf8.stringify(raw);
 			var input = document.getElementById('input');
-			input.innerHTML = result.toString();
-
+			input.innerHTML = TextProcessor.getOutput(result);
 			// init the autosave function for the new note
 			Store.lastSavedInput = result.toString();
 			$("#input").data('path', response.path);
@@ -387,14 +393,12 @@ PN = function() {
 			console.log("Loaded");
 			//this prevent a reload when the .focus method is called
 			Store.inputSync = true;
-			$("#input").focus();
 		}
 	}
 
 	/*
 	 *load or reload the tabs, and load
 	 */
-
 	this.initUserInterface= function(tabs) {
 		console.log("init User Interface", tabs)
 		$("#inputs-navs").html("");
@@ -508,7 +512,7 @@ PN = function() {
 		pn.checkUser();
 	});
 
-	Socket.on("error", function() {
+	Socket.on("error", function(data) {
 		console.error(data.message);
 	});
 
@@ -533,7 +537,6 @@ console.log("Loading pn extensions");
 
 //allow to click links on the content editable
 (function (){
-	
 $('#input a').live('click',function(event){
 	if(!pn.currentPath) return;
 	event.preventDefault();var url=$(event.target).attr("href"); window.open(url, '_blank');

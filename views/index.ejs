@@ -49,12 +49,12 @@
     </div>
     <div class="content">
 <div class="row-fluid">
-  <div class="span8">
+  <div class="span9">
     <ul id="inputs-navs" class="nav nav-tabs">
       <li class="active"><a href="#welcome" data-toggle="tab"><h3>Welcome!</h3></a></li>
     </ul>
 </div>
-<div class="span4">
+<div class="span3">
   <ul id="commands" class="nav nav-tabs"  >
     <li  style="display:none" class="command" title="Delete the current note"><a href="#" id="deleteFile"><i class="icon-trash"></i></a></li>
     <li class="command" title="Create a note"><a href="#" id="addNewFile"><i class="icon-plus"></i></a></li>
@@ -112,7 +112,7 @@
       window.console.error = function(){}
       window.console.info = function(){}
     }
-    Socket = io.connect('/');
+    Socket = io.connect("http://"+window.location.host);
     
     Socket.on('connected', function (data) {
       if(!PN.isInitialized){
@@ -122,6 +122,7 @@
       });
   });
 </script>
+<script src="/javascripts/TextProcessor.js"></script>
 <script src="/javascripts/pn.js"></script>
 
 
