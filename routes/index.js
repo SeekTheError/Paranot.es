@@ -17,7 +17,7 @@ client.on("error", function(err) {
 });
 
 /*
- * Check if the credentials are set and not null, 
+ * Check if the credentials are set and not null,
  *return true if everything is okay
  * else respond to the client directly
  */
@@ -33,10 +33,11 @@ function credentialsSet(params, res) {
 }
 
 /*
-* Check
-*/
-function pathSet(params,res){
-	if(params.path == "" ) {
+ * Check
+ */
+
+function pathSet(params, res) {
+	if(params.path == "") {
 		res.send({
 			status: "invalidFileName"
 		});
@@ -89,7 +90,7 @@ exports.deleteFile = function(req, res) {
 							res.send({
 								status: "fileDeleted"
 							});
-							io.sockets.in(getUserNameSpace(params)).emit('fileDeleted');
+							io.sockets. in (getUserNameSpace(params)).emit('fileDeleted');
 						} else {
 							res.send({
 								status: "error",
@@ -109,8 +110,8 @@ exports.deleteFile = function(req, res) {
 
 
 /*
-* Return userExist and the file that the user have
-*/
+ * Return userExist and the file that the user have
+ */
 exports.checkUser = function(req, res) {
 	var params = req.body;
 	if(!credentialsSet(params, res)) {
@@ -167,8 +168,8 @@ exports.createUser = function(req, res) {
 				});
 				*/
 				res.send({
-						status: "userCreated",
-					});
+					status: "userCreated",
+				});
 			})
 		} else {
 			res.send({
@@ -178,3 +179,16 @@ exports.createUser = function(req, res) {
 		}
 	});
 };
+
+UUID = require('node-uuid');
+exports.uuid = function(req, res) {
+	var c = req.params.count
+	var generated = [];
+	for(var i = c ; i > 0; i--) {
+		generated.push(UUID.v4())
+	};
+	console.log(generated)
+	res.send({
+		uuids: generated
+	})
+}

@@ -9,15 +9,43 @@ TextProcessor = (function() {
 	var onInputFunctions = [
 
 	function getContent() {
+		//handle the case where there is no div at the beggining(after full removal of the text eg)
+		var html=document.getElementById("input").innerHTML;
+		looseStart=html.split("<")[0]
+		if(looseStart != ""){
+			document.getElementById("input").innerHTML=html.replace(looseStart,"<div>"+looseStart+"</div>");
+		}
+
 		content = $("#input > div");
 		return content;
 	}, function divise(divs) {
 		var out = [];
+		var missingIds=0;
 		for (var i = 0; i < divs.length; i++) {
+			if(divs[i].id== ""){
+				missingIds++;
+			}
 			console.log(divs[i].innerHTML);
 			out.push(divs[i].innerHTML);
-			
+		
 		};
+
+		$.ajax({ url :"http://"+window.location.host+"/UUID/"+missingIds,dataType:"json" }).success(function(data){
+
+
+			console.log(data)
+
+		})
+		for (var i = 0; i < divs.length; i++) {
+			if(divs[i].id== ""){
+				missingIds++;
+			}
+			console.log(divs[i].innerHTML);
+			out.push(divs[i].innerHTML);
+		
+		};
+
+
 		console.log("TextProcessor: ",out);
 		return out;
 	},function toJson(input){

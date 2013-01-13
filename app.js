@@ -72,6 +72,7 @@ else {
   });
 
   app.get('/', routes.index);
+  app.get('/UUID/:count', routes.uuid);
   app.post('/createUser', routes.createUser);
   app.post('/checkUser', routes.checkUser);
   app.post('/deleteFile', routes.deleteFile);
