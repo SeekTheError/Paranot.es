@@ -1,4 +1,6 @@
 
+//TODO => better handle of the join room on reconnect
+
 io.sockets.on('connection', function(socket) {
 	socket.emit('connected', {
 		status: 'connected'
@@ -20,7 +22,11 @@ io.sockets.on('connection', function(socket) {
 							client.set(getContentPath(data), data.content, function(err, reply) {
 								if(reply) {
 									var status = data.newFile ? "fileCreated" : "fileSaved";
-									socket.broadcast.to(getContentPath(data)).emit('fileUpdated');
+									//directly brodcast a new version
+									var toBroadcast={path:data.path,
+									content:data.content}
+									socket.broadcast.to(getContentPath(data))
+												.emit('fileUpdated',toBroadcast);
 									status == "fileCreated" ? socket.broadcast.to(getUserNameSpace(data)).emit("fileCreated") : "";
 									socket.emit(status)
 								} else {

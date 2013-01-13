@@ -180,15 +180,31 @@ exports.createUser = function(req, res) {
 	});
 };
 
-UUID = require('node-uuid');
+
 exports.uuid = function(req, res) {
-	var c = req.params.count
-	var generated = [];
-	for(var i = c ; i > 0; i--) {
-		generated.push(UUID.v4())
-	};
-	console.log(generated)
+	var c = req.params.count;
+	c>5000?c=5000:false;
+	uuids=generateUUID(c);
 	res.send({
-		uuids: generated
+		uuids: uuids
 	})
 }
+
+UUID = require('node-uuid');
+function generateUUID (count){
+	var generated = [];
+	
+	for(var i = count ; i > 0; i--) {
+		generated.push(UUID.v4())
+	};
+   return generated;
+}
+
+
+
+
+
+
+
+
+

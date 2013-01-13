@@ -6,11 +6,19 @@
 */
 PN = function() {
 
-	if(!$ || !CryptoJS || !Socket) {
+	if(!$ || !CryptoJS || !Socket || !TextProcessor) {
 		console.error("Missing Dependencies");
+		return;
 	}
+
+	var pn = this;
+
 	// a way to scope some variables at the pn object level;
-	var Store = {};
+	Store = {};
+
+	this.ExposedStore = {}
+
+	this.ExposedStore.UUIDS = [];
 
 	/* this variable is used for two purpose:
 	 *	on file Creation to autodisplay the new file
@@ -23,9 +31,9 @@ PN = function() {
 	 * Event originated from the user interface
 	 */
 
-	var pn=this;
 
-	this.isInitialized =false,
+
+	this.isInitialized = false,
 
 	(function(pn) {
 		$("#connect").click(function(event) {
@@ -200,10 +208,10 @@ PN = function() {
 			}
 			return false;
 		});
-		
-		//});
 
-		loadExtensions(pn);pn.isInitialized =true;
+		//});
+		loadExtensions(pn);
+		pn.isInitialized = true;
 		console.log("pn is ready");
 	})(this);
 
@@ -234,6 +242,19 @@ PN = function() {
 			path: path,
 		}
 		Socket.emit("loadFile", data);
+		pn.getUUIDS();
+	}
+
+	this.getUUIDS = function() {
+		if(pn.ExposedStore.UUIDS.length < 10000) {
+			$.ajax({
+				url: "http://" + window.location.host + "/UUID/" + 10000,
+				dataType: "json"
+			}).success(function(data) {
+				pn.ExposedStore.UUIDS = pn.ExposedStore.UUIDS.concat(data.uuids);
+
+			})
+		}
 	}
 
 
@@ -257,7 +278,7 @@ PN = function() {
 		var content = CryptoJS.AES.encrypt(input, pass).toString();
 		var key = CryptoJS.SHA1(login + pass).toString();
 
-		
+
 
 		var data = {
 			login: encodeURIComponent(login),
@@ -267,6 +288,7 @@ PN = function() {
 		}
 		$("#saveStatus").html("Saving");
 		Socket.emit('saveFile', data);
+		pn.getUUIDS();
 	}
 
 	this.createFile = function(path) {
@@ -278,7 +300,10 @@ PN = function() {
 		var login = $("#login").val();
 		var pass = $("#pass").val();
 		// init the content
-		var init=JSON.stringify([{i:1,content:"&nbsp;"}]);
+		var init = JSON.stringify([{
+			i: 1,
+			content: "&nbsp;"
+		}]);
 		var content = CryptoJS.AES.encrypt(init, pass).toString();
 		var key = CryptoJS.SHA1(login + pass).toString();
 		var data = {
@@ -348,7 +373,7 @@ PN = function() {
 		})
 	}
 
-	this.createUser= function() {
+	this.createUser = function() {
 		console.log("creating user");
 		var login = $("#login").val();
 		var pass = $("#pass").val();
@@ -373,24 +398,29 @@ PN = function() {
 	 * Decrypt and display a note
 	 */
 
-	this.displayContent = function(response) {
+	this.displayContent = function(response,reload) {
 		if(response) {
 			$("#input").show();
 			$("#input").attr('contenteditable', 'true');
 			//console.log("displaying", response)
 			console.log("displaying: " + response.path);
-			 
+
 			var pass = $("#pass").val();
 
 			var raw = CryptoJS.AES.decrypt(response.content, pass);
 			var result = CryptoJS.enc.Utf8.stringify(raw);
 			var input = document.getElementById('input');
-			input.innerHTML = TextProcessor.getOutput(result);
+
+			//Now the 
+			TextProcessor.setOutput(result);
+
+			if(reload)pn.ExposedStore.modeReload = true;
 			// init the autosave function for the new note
 			Store.lastSavedInput = result.toString();
 			$("#input").data('path', response.path);
-			pn.currentPath=response.path;
+			pn.currentPath = response.path;
 			console.log("Loaded");
+
 			//this prevent a reload when the .focus method is called
 			Store.inputSync = true;
 		}
@@ -399,7 +429,7 @@ PN = function() {
 	/*
 	 *load or reload the tabs, and load
 	 */
-	this.initUserInterface= function(tabs) {
+	this.initUserInterface = function(tabs) {
 		console.log("init User Interface", tabs)
 		$("#inputs-navs").html("");
 		$(".command").show();
@@ -513,7 +543,7 @@ PN = function() {
 	});
 
 	Socket.on("error", function(data) {
-		console.error(data.message);
+		console.error(data);
 	});
 
 	Socket.on("fileSaved", function(data) {
@@ -525,25 +555,37 @@ PN = function() {
 		$('#newFileName').html('<i>New Note</i>');
 	});
 	Socket.on("fileUpdated", function(data) {
-		console.log("file updated");
-		pn.load();
+		console.log("file updated on path:",data.path);
+		if(data.path == pn.currentPath){
+			
+			console.log()
+			pn.displayContent(data,true)
+		}
+		
+
 	});
 
 }
 
 
-function loadExtensions(pn){
-console.log("Loading pn extensions");
+function loadExtensions(pn) {
+	console.log("Loading pn extensions");
 
-//allow to click links on the content editable
-(function (){
-$('#input a').live('click',function(event){
-	if(!pn.currentPath) return;
-	event.preventDefault();var url=$(event.target).attr("href"); window.open(url, '_blank');
-   window.focus();})
-$('#input a').live('hover',function(){$('#input').attr("contenteditable",false)},function(){
-	if(!pn.currentPath) return;
-	$('#input').attr("contenteditable",true)});
-})();
+	//allow to click links on the content editable, and display them in new tabs
+	(function() {
+		$('#input a').live('click', function(event) {
+			if(!pn.currentPath) return;
+			event.preventDefault();
+			var url = $(event.target).attr("href");
+			window.open(url, '_blank');
+			window.focus();
+		})
+		$('#input a').live('hover', function() {
+			$('#input').attr("contenteditable", false)
+		}, function() {
+			if(!pn.currentPath) return;
+			$('#input').attr("contenteditable", true)
+		});
+	})();
 
 }

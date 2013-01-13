@@ -24,7 +24,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="brand" href="/">&nbsp;Paranot.es</a>
+          <a class="brand" href="/">&nbsp;Paranot.es - Experimental</a>
           <div class="nav-collapse collapse">
             <ul class="nav pull-right">
               <li>
@@ -113,11 +113,15 @@
       window.console.info = function(){}
     }
     Socket = io.connect("http://"+window.location.host);
-    
+    pn={};
     Socket.on('connected', function (data) {
-      if(!PN.isInitialized){
+      if(!pn.isInitialized){
         pn = new PN();
-      };
+      }else {
+        if(pn.currentPath){
+          pn.load();
+        }
+      }
       console.log("socket.io: ",data);
       });
   });
