@@ -2,6 +2,7 @@ TextProcessor = (function() {
 
 	TextProcessor = {}
 
+	TextProcessor.cursor = null;
 
 	//fuction performed on the input
 	//Must return a STRING
@@ -13,7 +14,13 @@ TextProcessor = (function() {
 		var html = document.getElementById("input").innerHTML;
 		looseStart = html.split("<")[0]
 		if(looseStart != "") {
-			document.getElementById("input").innerHTML = html.replace(looseStart, "<div>" + looseStart + "</div>");
+			var restoredId="";
+			//prevent client desync
+			if(TextProcessor.cursor && pn.currentPath == TextProcessor.cursor.path){
+				var restoredID=TextProcessor.cursor.id;
+			}
+
+			document.getElementById("input").innerHTML = html.replace(looseStart, "<div id='"+restoredID+"' >" + looseStart + "</div>");
 		}
 
 		content = $("#input > div");
@@ -42,7 +49,6 @@ TextProcessor = (function() {
 				content: divs[i].innerHTML
 			}
 		};
-		console.log(tmp);
 		return JSON.stringify(tmp);
 	}
 
@@ -52,20 +58,29 @@ TextProcessor = (function() {
 	//Must Return a STRING
 	var onOutputFunctions = [
 
-	function divise(content) {
-		//display the content in a regular way;
-		console.log("contentJSON:", content);
+	function loadOrUpdate(content) {
+		var js=null;
 		try {
 			js = JSON.parse(content);
 		} catch(error) {
 			return content;
 		}
+		if(js.length>0 ){
+
+		}
+
+		//display the content in a regular way;
 		if(!pn.ExposedStore.modeReload) {
+			if(js.length>0 ){
+				
+			}
 			var html = "";
 			for(var i in js) {
+				if(i == 0){
+					TextProcessor.cursor={path:pn.currentPath,id:js[i].id}
+					}
 				html += '<div id="' + js[i].id + '">' + js[i].content + '</div>';
 			};
-
 			console.log(js);
 			document.getElementById("input").innerHTML = html;
 		}
@@ -74,21 +89,22 @@ TextProcessor = (function() {
 			pn.ExposedStore.modeReload = false;
 			console.log("reloading");
 			var toUpdate=null;
-			var newBlockIncrement=0
+			var newBlockIncrement=0;
+			var deletedDivs=[]
+			for(var i in js) {
+				//if a divs is impossible to find and 
+			}
 			for(var i in js) {
 				if(toUpdate=document.getElementById(js[i].id)){
 					toUpdate.innerHTML=js[i].content;
-					newBlockIncrement=0;
 				}else {
-				//on new or lost divs
-				$($("#input > div")[js[i].index+newBlockIncrement]).after(
-					$('<div id="' + js[i].id + '">' + js[i].content + '</div>'));
-				newBlockIncrement++;	
+				//on new divs
+				$($("#input > div")[js[i].index-1]).after(
+					$('<div id="' + js[i].id + '">' + js[i].content + '</div>'));	
+
 				}
 				//html += '<div id="' + js[i].id + '">' + js[i].content + '</div>';
 			};
-
-			//pn.save()
 		}
 
 
