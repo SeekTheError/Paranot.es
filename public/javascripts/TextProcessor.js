@@ -21,6 +21,7 @@ TextProcessor = (function() {
 			}
 
 			document.getElementById("input").innerHTML = html.replace(looseStart, "<div id='"+restoredID+"' >" + looseStart + "</div>");
+		
 		}
 
 		content = $("#input > div");
@@ -37,7 +38,6 @@ TextProcessor = (function() {
 				divs[i].id = pn.ExposedStore.UUIDS.pop();
 			}
 			previousUUIDS.push(divs[i].id);
-
 		};
 		return divs;
 	}, function convertToJson(divs) {
@@ -68,7 +68,6 @@ TextProcessor = (function() {
 		if(js.length>0 ){
 
 		}
-
 		//display the content in a regular way;
 		if(!pn.ExposedStore.modeReload) {
 			if(js.length>0 ){
@@ -90,10 +89,22 @@ TextProcessor = (function() {
 			console.log("reloading");
 			var toUpdate=null;
 			var newBlockIncrement=0;
-			var deletedDivs=[]
-			for(var i in js) {
-				//if a divs is impossible to find and 
+			var currentDivs=$("#input > div")
+			for(var i in currentDivs) {
+				for(var j in js) {
+					if(js[j].id == currentDivs[i].id )
+						currentDivs[i]=false
+				}
 			}
+			//if a existing div is impossible to find, divs is impossible to find,
+			//remove it(TODO > execpt if we are working on it)
+			for (var i in currentDivs){
+
+				//protect the Cursor(the first div, not the carret :) )
+				if(i != 0)
+				$("#"+currentDivs[i].id).remove();
+			}
+
 			for(var i in js) {
 				if(toUpdate=document.getElementById(js[i].id)){
 					toUpdate.innerHTML=js[i].content;
