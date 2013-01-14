@@ -17,4 +17,6 @@ node app.js
 
 and open your browser on "localhost"
 
+This is the branch were i break Things, trying to make paranotes concurent(which is not it's original purpose )
+
 
