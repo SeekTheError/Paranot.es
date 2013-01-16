@@ -134,14 +134,12 @@ var TEXTPROCESSOR = function() {
 
 		TextProcessor.getInput = function() {
 				if(setState(READING)) {
-					return;
-				} else {
 					var result = performOnInput();
 					if(typeof result !== "string") {
 						throw new Error("TextProcessorError", "function get Input must return Text of type string, check the Input proccessors chain");
 					}
 					return result;
-					setState(READY)
+					setState(READY);
 				}
 			}
 
@@ -156,6 +154,26 @@ var TEXTPROCESSOR = function() {
 					throw new Error("TextProcessorError", "function set Output must get Text of type string as param");
 				};
 			}
+		}
+
+		function performOnInput() {
+			var pipe;
+			for(var i = 0; i < onInputFunctions.length; i++) {
+				pipe = onInputFunctions[i](pipe);
+			};
+			setState(READY);
+			return pipe;
+		}
+
+		function performOnOutput(rawOutput) {
+			var pipe = rawOutput;
+			for(var i = 0; i < onOutputFunctions.length; i++) {
+				pipe = onOutputFunctions[i](pipe);
+			};
+
+			setState(READY);
+			return pipe;
+
 		}
 
 		var queu = function() {
@@ -178,7 +196,7 @@ var TEXTPROCESSOR = function() {
 					this.queu = []
 				}
 
-				this.hasRequest = function(){
+				this.hasRequest = function() {
 					return this.queu.length > 0
 				}
 
@@ -192,23 +210,24 @@ var TEXTPROCESSOR = function() {
 		var loop = function() {
 				loop = this;
 				var interval = null;
-				
+
 				this.start = function() {
 					loop.stop();
 					interval = setInterval(function() {
-						console.log("from loop:" , currentState);
-						if(getState() == WRITTING_NEXT_READ) {
+						console.log("from loop:", currentState);
+						if(getState() == READY_TO_READ) {
 							console.log("from loop: saving");
+							setState(READING);
 							pn.send(performOnInput());
 							return;
 						}
 						//TODO stop it;
-						if(queu.hasRequest() && setState("WRITTING")) {
+						if(queu.hasRequest() && setState("WRITING")) {
 							request = queu.processQueu();
 							if(request) {
 								console.log("loop: request found")
 								performOnOutput(request);
-							}else {
+							} else {
 								console.log("loop: no request to proccess");
 							}
 						}
@@ -231,7 +250,8 @@ var TEXTPROCESSOR = function() {
 		var READY = "READY";
 		var READING = "READING";
 		var WRITING = "WRITING";
-		var WRITTING_NEXT_READ = "WRITING_NEXT_READ";
+		var WRITING_NEXT_READ = "WRITING_NEXT_READ";
+		var READY_TO_READ = "READY_TO_READ";
 
 		var currentState = READY;
 
@@ -241,52 +261,56 @@ var TEXTPROCESSOR = function() {
 
 		TextProcessor.getState = getState;
 
-		var setState = function(state) {
+		var setState = function(requestedState) {
 				if(currentState == READY) {
-					currentState = state;
+					currentState = requestedState;
 					return true;
-				} else if(currentState == WRITING && state == READING) {
-					currentState = WRITTING_NEXT_READ;
-					return false;
-				} else {
+				}
+				if(currentState == WRITING && requestedState == READING) {
+					currentState = WRITING_NEXT_READ;
 					return false;
 				}
-			}
-			TextProcessor.setState = setState;
+				if(currentState == WRITING && requestedState == WRITING) {
+					return false;
+				}
+				if(currentState == WRITING && requestedState == READY) {
+					currentState = READY;
+					return false;
+				}
+				if(currentState == WRITING_NEXT_READ && requestedState == READY) {
+					currentState = READY_TO_READ;
+					return true
+				}
+				if(currentState == WRITING_NEXT_READ && requestedState == READING) {
+					return false;
+				}
+				if(currentState == READING && requestedState == READY) {
+					currentState = READY;
+					return true
+				}
+				if(currentState == READY_TO_READ && requestedState == READING) {
+					currentState = READING;
+					return true
+				}
 
-			//only to be used by finnished read or write
-			var forceSetState = function(state) {
+				console.error("setState: no logical branch found")
+				return false;
+
+			}
+		TextProcessor.setState = setState;
+
+		//only to be used by finnished read or write
+		var forceSetState = function(state) {
+				console.warn("TEST PURPOSE ONLY")
 				currentState = state;
 			}
-			TextProcessor.forceSetState = forceSetState;
 
-
-		
-
-		function performOnInput() {
-			var pipe;
-			for(var i = 0; i < onInputFunctions.length; i++) {
-				pipe = onInputFunctions[i](pipe);
-			};
-			forceSetState(READY);
-			return pipe;
-		}
-
-		function performOnOutput(rawOutput) {
-			var pipe = rawOutput;
-			for(var i = 0; i < onOutputFunctions.length; i++) {
-				pipe = onOutputFunctions[i](pipe);
-			};
-			if(getState() != WRITTING_NEXT_READ) {
-				setState(READY);
-			}
-			forceSetState(READY);
-			return pipe;
-
-		}
+		TextProcessor.forceSetState = forceSetState;
 
 		return TextProcessor;
 
 	}
 
 textProcessor = new TEXTPROCESSOR();
+
+textProcessor.loop.start();
