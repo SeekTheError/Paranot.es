@@ -275,7 +275,7 @@ var TEXTPROCESSOR = function() {
 				}
 				if(currentState == WRITING && requestedState == READY) {
 					currentState = READY;
-					return false;
+					return true;
 				}
 				if(currentState == WRITING_NEXT_READ && requestedState == READY) {
 					currentState = READY_TO_READ;
@@ -292,11 +292,10 @@ var TEXTPROCESSOR = function() {
 					currentState = READING;
 					return true
 				}
-
 				console.error("setState: no logical branch found")
 				return false;
-
 			}
+			
 		TextProcessor.setState = setState;
 
 		//only to be used by finnished read or write
