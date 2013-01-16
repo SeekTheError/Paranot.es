@@ -6,7 +6,7 @@
 */
 PN = function() {
 
-	if(!$ || !CryptoJS || !Socket || !TextProcessor) {
+	if(!$ || !CryptoJS || !Socket || !textProcessor) {
 		console.error("Missing Dependencies");
 		return;
 	}
@@ -141,7 +141,7 @@ PN = function() {
 		 */
 
 		//the time the user has to stop typing for the saved to be performed
-		var TIME_OUT_VALUE = 500;
+		var TIME_OUT_VALUE = 100;
 		//the saveStatus var is used in the state machine
 		Store.saveStatus = "DONE_TYPING";
 		$("#input").keyup(function(e) {
@@ -263,7 +263,8 @@ PN = function() {
 	 * exposed
 	 */
 	this.save = function() {
-		var input = TextProcessor.getInput();
+		var input =textProcessor.getInput();
+		if(input){
 		var login = $("#login").val();
 		var pass = $("#pass").val();
 		var path = $("#input").data('path');
@@ -274,11 +275,8 @@ PN = function() {
 			return;
 		}
 
-
 		var content = CryptoJS.AES.encrypt(input, pass).toString();
 		var key = CryptoJS.SHA1(login + pass).toString();
-
-
 
 		var data = {
 			login: encodeURIComponent(login),
@@ -288,7 +286,33 @@ PN = function() {
 		}
 		$("#saveStatus").html("Saving");
 		Socket.emit('saveFile', data);
+		
+		}
 		pn.getUUIDS();
+	}
+
+	this.send= function (input){
+		var login = $("#login").val();
+		var pass = $("#pass").val();
+		var path = $("#input").data('path');
+		console.log("saving:", path);
+		//TODO check if this bug is gone!!!
+		if(!path) {
+			console.log("abort, cause: no path");
+			return;
+		}
+
+		var content = CryptoJS.AES.encrypt(input, pass).toString();
+		var key = CryptoJS.SHA1(login + pass).toString();
+
+		var data = {
+			login: encodeURIComponent(login),
+			key: encodeURIComponent(key),
+			path: path,
+			content: content
+		}
+		$("#saveStatus").html("Saving");
+		Socket.emit('saveFile', data);
 	}
 
 	this.createFile = function(path) {
@@ -412,7 +436,7 @@ PN = function() {
 			var input = document.getElementById('input');
 
 			//Now the 
-			TextProcessor.setOutput(result);
+			textProcessor.setOutput(result);
 
 			if(reload)pn.ExposedStore.modeReload = true;
 			// init the autosave function for the new note
