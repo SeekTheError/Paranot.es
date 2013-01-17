@@ -18,15 +18,15 @@ var TEXTPROCESSOR = function() {
 		}
 		var path=null;
 
-		TextProcessor.getSavePath = function (){
+		getSavePath = function (){
 			return path;
 		}
 
-		TextProcessor.setSavePath = function(p){
+		setSavePath = function(p){
 			path=p
 		}
 
-		function perform(funcArray,callback,request) {
+		function perform(funcArray,callback,request,arg) {
 			var pipe;
 			if(request){
 				pipe=request;
@@ -36,13 +36,13 @@ var TEXTPROCESSOR = function() {
 			}
 			setState(READY);
 			if(callback){
-				callback(pipe)
+				callback(pipe,arg)
 			};
 			return pipe;
 		}
 
 		TextProcessor.getInput = function(path) {
-			TextProcessor.setSavePath(path);
+			setSavePath(path);
 			setState(READING);
 		}
 
@@ -88,12 +88,13 @@ var TEXTPROCESSOR = function() {
 						if(getState() == READY_TO_READ) {
 							console.log("from loop: saving");
 							setState(READING);
-							var input=perform(readFunctions,pn.send);
+							var input=perform(readFunctions,pn.send,null,getSavePath());
 							return;
 						}
 						//TODO stop it;
 						if(queu.internalArray && getState() == READY_TO_WRITE) {
 							var request = queu.processQueu();
+							setState(WRITING);
 							if(request) {
 								console.log("loop: request found")
 								perform(writeFunctions,null,request);
@@ -102,7 +103,7 @@ var TEXTPROCESSOR = function() {
 							}
 						}
 
-					}, 500);
+					}, 100);
 				}
 				this.stop = function() {
 					if(interval) {
@@ -141,6 +142,11 @@ var TEXTPROCESSOR = function() {
 					return true;
 				}
 
+				if(currentState == READY_TO_WRITE && requestedState == WRITING){
+					currentState=WRITING;
+					return true;
+				}
+
 				if(currentState == WRITING && requestedState == READING) {
 					currentState = WRITING_NEXT_READ;
 					return false;
@@ -152,6 +158,11 @@ var TEXTPROCESSOR = function() {
 					currentState = READY;
 					return true;
 				}
+				if(currentState == READING && requestedState == WRITING) {
+					
+					return false;
+				}
+
 				if(currentState == WRITING_NEXT_READ && requestedState == READY) {
 					currentState = READY_TO_READ;
 					return true
@@ -167,6 +178,7 @@ var TEXTPROCESSOR = function() {
 					currentState = READING;
 					return true
 				}
+
 				console.error("setState: no logical branch found")
 				return false;
 			}
