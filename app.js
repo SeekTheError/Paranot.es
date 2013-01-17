@@ -12,7 +12,6 @@ if(cluster.isMaster) {
   function errorMsg(worker) {
     console.error("Something must be wrong with the connection ... " + (worker ? worker.id : ''));
     console.log()
-
   }
   //when a new worker is connected
   cluster.on('online', function(worker) {

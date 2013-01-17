@@ -26,15 +26,12 @@ PN = function() {
 	 */
 	Store.nextPath = null;
 
+	this.isInitialized = false,
+
 
 	/*
 	 * Event originated from the user interface
 	 */
-
-
-
-	this.isInitialized = false,
-
 	(function(pn) {
 		$("#connect").click(function(event) {
 			event.preventDefault();
@@ -122,7 +119,7 @@ PN = function() {
 		 * Auto save when the content is modified
 		 */
 		//the time the user has to stop typing for the saved to be performed
-		var TIME_OUT_VALUE = 100;
+		var TIME_OUT_VALUE = 300;
 		//the saveStatus var is used in the state machine
 		Store.saveStatus = "DONE_TYPING";
 		$("#input").keyup(function(e) {
@@ -137,7 +134,7 @@ PN = function() {
 				var beforeTimeoutInputContent = $("#input").html();
 				setTimeout(function() {
 					var inputContent = $("#input").html();
-					if(Store.saveStatus == "IS_TYPING" && inputContent != beforeTimeoutInputContent) {
+					if(Store.saveStatus == "IS_TYPING" && inputContent == beforeTimeoutInputContent) {
 						Store.saveStatus = "DONE_TYPING";
 						Store.lastSavedInput = inputContent;
 						pn.save();
@@ -235,7 +232,6 @@ PN = function() {
 		}
 	}
 
-
 	/*
 	 * Method to save the current note on the server
 	 * exposed
@@ -244,12 +240,15 @@ PN = function() {
 		var path = $("#input").data('path');
 		if(!path) {
 			console.error("abort, cause: no path");
+
 		} else {
 			$("#saveStatus").html("Saving...");
 			var input = textProcessor.getInput(path);
 			if(input) {
 				var login = $("#login").val();
 				var pass = $("#pass").val();
+
+				console.log("saving:", path);
 				var content = CryptoJS.AES.encrypt(input, pass).toString();
 				var key = CryptoJS.SHA1(login + pass).toString();
 				var data = {
@@ -258,7 +257,6 @@ PN = function() {
 					path: path,
 					content: content
 				}
-				console.log("saving:", path);
 				Socket.emit('saveFile', data);
 			}
 			pn.getUUIDS();
@@ -268,6 +266,8 @@ PN = function() {
 	this.send = function(input, path) {
 		var login = $("#login").val();
 		var pass = $("#pass").val();
+		console.log("saving:", path);
+
 		var content = CryptoJS.AES.encrypt(input, pass).toString();
 		var key = CryptoJS.SHA1(login + pass).toString();
 
@@ -277,13 +277,13 @@ PN = function() {
 			path: path,
 			content: content
 		}
-		Socket.emit('saveFile', data);
-		console.log("saving:", path);
 		$("#saveStatus").html("Saving");
+		Socket.emit('saveFile', data);
 	}
 
 	this.createFile = function(path) {
 		Store.nextPath = encodeURIComponent(path);
+		console.log("creating new file: " + path);
 		$("#newFileName").html("<i>New Note</i>")
 		var input = $("#input").html();
 		var login = $("#login").val();
@@ -301,7 +301,6 @@ PN = function() {
 			content: content,
 			newFile: true
 		}
-		console.log("creating new file: " + path);
 		Socket.emit("saveFile", data);
 	}
 
@@ -398,14 +397,13 @@ PN = function() {
 			var input = document.getElementById('input');
 
 			//Now the 
-			textProcessor.setOutput(result);
-
-			if(reload) pn.ExposedStore.modeReload = true;
-			// init the autosave function for the new note
+			if(reload) {
+				pn.ExposedStore.modeReload = true;
+			}
 			Store.lastSavedInput = result.toString();
 			$("#input").data('path', response.path);
 			pn.currentPath = response.path;
-			console.log("Loaded");
+			textProcessor.setOutput(result);
 		}
 	}
 
@@ -450,6 +448,7 @@ PN = function() {
 		}
 		if(response.status == "userExist") {
 			console.log("User Exist");
+			$("#input").html("");
 			pn.initUserInterface(response.paths);
 			return;
 		}
