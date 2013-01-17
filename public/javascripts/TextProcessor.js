@@ -1,14 +1,39 @@
 /* The Text processor handle the read-write operation on the #input area
  It also implete a binary state machine that prevent Write and Read operation to be parallelized */
 
+
+
 var TEXTPROCESSOR = function() {
 
 		TextProcessor = this;
 
 		TextProcessor.cursor = null;
 
-		//First function get the inoput
-		var onInputFunctions = [
+		TextProcessor.getInput = function() {
+			if(setState(READING)) {
+				var result = performOnInput();
+				if(typeof result !== "string") {
+					throw new Error("TextProcessorError", "function get Input must return Text of type string, check the Input proccessors chain");
+				}
+				return result;
+				setState(READY);
+			}
+		}
+
+		TextProcessor.setOutput = function(rawOutput) {
+			if(!setState(WRITING)) {
+				queu.addToQueu(rawOutput);
+				return;
+			} else {
+				performOnOutput(rawOutput);
+				if(typeof rawOutput !== "string") {
+					throw new Error("TextProcessorError", "function set Output must get Text of type string as param");
+				};
+			}
+		}
+
+
+		var onReadFunctions = [
 
 		function getContentAndPreventError() {
 			//handle the case where there is no div at the beggining(after full removal of the text eg)
@@ -16,10 +41,11 @@ var TEXTPROCESSOR = function() {
 			looseStart = html.split("<")[0]
 			if(looseStart != "") {
 				var restoredId = "";
-				//prevent client desync
+				//restore the cursor to prevent desync
 				if(TextProcessor.cursor && pn.currentPath == TextProcessor.cursor.path) {
 					var restoredID = TextProcessor.cursor.id;
-					document.getElementById("input").innerHTML = html.replace(looseStart, "<div id='" + restoredID + "' >" + looseStart + "</div>");
+					var newHtml = "<div id='" + restoredID + "' >" + looseStart + "</div>"
+					document.getElementById("input").innerHTML = html.replace(looseStart, newHtml);
 				}
 			}
 			//return the content split by divs
@@ -53,13 +79,11 @@ var TEXTPROCESSOR = function() {
 				}
 			};
 			return JSON.stringify(tmp);
-		}
+		}]
 
-		]
 
-		//fuction performed on the Output
-		//Must Return a STRING
-		var onOutputFunctions = [
+		var onWriteFunctions = [
+		//TODO -> refactor this mess
 
 		function loadOrUpdate(content) {
 			var js = null;
@@ -72,7 +96,6 @@ var TEXTPROCESSOR = function() {
 			//display the content in a regular way;
 			if(!pn.ExposedStore.modeReload) {
 				TextProcessor.previousJs = {};
-
 				var html = "";
 				for(var i in js) {
 					if(i == 0) {
@@ -118,7 +141,6 @@ var TEXTPROCESSOR = function() {
 							merged = true
 							//for now, doing nothing is refusing the changes
 							console.log("merge needed");
-
 						}
 					} else {
 						//on new divs
@@ -132,35 +154,11 @@ var TEXTPROCESSOR = function() {
 
 		}]
 
-		TextProcessor.getInput = function() {
-				if(setState(READING)) {
-					var result = performOnInput();
-					if(typeof result !== "string") {
-						throw new Error("TextProcessorError", "function get Input must return Text of type string, check the Input proccessors chain");
-					}
-					return result;
-					setState(READY);
-				}
-			}
-
-
-		TextProcessor.setOutput = function(rawOutput) {
-			if(!setState(WRITING)) {
-				queu.addToQueu(rawOutput);
-				return;
-			} else {
-				performOnOutput(rawOutput);
-				if(typeof rawOutput !== "string") {
-					throw new Error("TextProcessorError", "function set Output must get Text of type string as param");
-				};
-			}
-		}
-
 		function performOnInput() {
 			var pipe;
 			for(var i = 0; i < onInputFunctions.length; i++) {
-				pipe = onInputFunctions[i](pipe);
-			};
+				pipe = onReadFunctions[i](pipe);
+			}
 			setState(READY);
 			return pipe;
 		}
@@ -168,16 +166,14 @@ var TEXTPROCESSOR = function() {
 		function performOnOutput(rawOutput) {
 			var pipe = rawOutput;
 			for(var i = 0; i < onOutputFunctions.length; i++) {
-				pipe = onOutputFunctions[i](pipe);
-			};
-
+				pipe = onWriteFunctions[i](pipe);
+			}
 			setState(READY);
 			return pipe;
-
 		}
 
 		var queu = function() {
-				queu = this;
+				var queu = this;
 				this.queu = [];
 				this.addToQueu = function(request) {
 					this.queu.push(request);
@@ -199,12 +195,9 @@ var TEXTPROCESSOR = function() {
 				this.hasRequest = function() {
 					return this.queu.length > 0
 				}
-
 				return this;
+			}
 
-			};
-
-		TextProcessor.queu = new queu();
 
 
 		var loop = function() {
@@ -222,8 +215,8 @@ var TEXTPROCESSOR = function() {
 							return;
 						}
 						//TODO stop it;
-						if(queu.hasRequest() && setState("WRITING")) {
-							request = queu.processQueu();
+						if(TextProcessor.queu.hasRequest() && setState("WRITING")) {
+							request = TextProcessor.queu.processQueu();
 							if(request) {
 								console.log("loop: request found")
 								performOnOutput(request);
@@ -239,11 +232,9 @@ var TEXTPROCESSOR = function() {
 						clearInterval(interval);
 					}
 
-
 				}
 				return loop;
 			};
-		TextProcessor.loop = new loop();
 
 
 
@@ -258,8 +249,9 @@ var TEXTPROCESSOR = function() {
 		var getState = function() {
 				return currentState;
 			}
+			//TODO exposed for dev purpose only
+			TextProcessor.getState = getState;
 
-		TextProcessor.getState = getState;
 
 		var setState = function(requestedState) {
 				if(currentState == READY) {
@@ -295,21 +287,19 @@ var TEXTPROCESSOR = function() {
 				console.error("setState: no logical branch found")
 				return false;
 			}
-			
-		TextProcessor.setState = setState;
 
-		//only to be used by finnished read or write
-		var forceSetState = function(state) {
-				console.warn("TEST PURPOSE ONLY")
-				currentState = state;
-			}
+			TextProcessor.setState = setState;
 
-		TextProcessor.forceSetState = forceSetState;
+		(function(TextProcessor){
+			TextProcessor.queu = new queu();
+			TextProcessor.loop = new loop();
+		})(TextProcessor);
+		
 
 		return TextProcessor;
-
 	}
 
 textProcessor = new TEXTPROCESSOR();
 
 textProcessor.loop.start();
+
