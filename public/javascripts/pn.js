@@ -97,14 +97,6 @@ PN = function() {
 		});
 
 
-		/*
-		 * Save when changing file
-		 */
-		$("#input").focusout(function(event) {
-			event.preventDefault();
-			pn.save();
-		});
-
 		/**
 		 * empty the new file box on click
 		 */
@@ -119,7 +111,7 @@ PN = function() {
 		 * Auto save when the content is modified
 		 */
 		//the time the user has to stop typing for the saved to be performed
-		var TIME_OUT_VALUE = 300;
+		var TIME_OUT_VALUE = 500;
 		//the saveStatus var is used in the state machine
 		Store.saveStatus = "DONE_TYPING";
 		$("#input").keyup(function(e) {
