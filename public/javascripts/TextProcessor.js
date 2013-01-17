@@ -9,34 +9,49 @@ var TEXTPROCESSOR = function() {
 
 		TextProcessor.cursor = null;
 
-		TextProcessor.start = function(){
+		TextProcessor.start = function() {
 			loop.start()
 		}
 
-		TextProcessor.stop = function(){
+		TextProcessor.stop = function() {
 			loop.stop()
 		}
-		var path=null;
 
-		getSavePath = function (){
-			return path;
+
+		PathStore = function() {
+			this.internalPath = null;
+
+			getSavePath = function() {
+				var p=this.internalPath;
+				this.internalPath=null;
+				return p;
+			}
+
+			setSavePath = function(newPath) {
+				if(this.internalPath != null) {
+					console.warn("Current path has not been consumed");
+					return false;
+				} else {
+					this.internalPath = newPath
+					return true;
+				}
+			}
+			return this;
 		}
 
-		setSavePath = function(p){
-			path=p
-		}
+		pathStore = new PathStore();
 
-		function perform(funcArray,callback,request,arg) {
+		function perform(funcArray, callback, request, arg) {
 			var pipe;
-			if(request){
-				pipe=request;
+			if(request) {
+				pipe = request;
 			}
 			for(var i = 0; i < funcArray.length; i++) {
 				pipe = funcArray[i](pipe);
 			}
 			setState(READY);
-			if(callback){
-				callback(pipe,arg)
+			if(callback) {
+				callback(pipe, arg)
 			};
 			return pipe;
 		}
@@ -53,8 +68,8 @@ var TEXTPROCESSOR = function() {
 
 		var queu = function() {
 				var queu = this;
-				 var internalArray = [];
-				 this.internalArray=internalArray;
+				var internalArray = [];
+				this.internalArray = internalArray;
 				this.addToQueu = function(request) {
 					internalArray.push(request);
 				}
@@ -69,41 +84,35 @@ var TEXTPROCESSOR = function() {
 				this.clearQueu = function() {
 					internalArray = []
 				}
-
-				
 				return this;
 			}
 
 		var queu = new queu();
-		TextProcessor.queu=queu;
-
+		TextProcessor.queu = queu;
 		var loop = function() {
 				loop = this;
 				var interval = null;
-
 				this.start = function() {
 					loop.stop();
-					interval = setInterval(function() {
-						console.log("from loop:", currentState);
+					var interval = setInterval(function() {
+						//console.log("from loop:", currentState);
 						if(getState() == READY_TO_READ) {
-							console.log("from loop: saving");
 							setState(READING);
-							var input=perform(readFunctions,pn.send,null,getSavePath());
-							return;
+							var input = perform(readFunctions, pn.send, null, getSavePath());
+
 						}
 						//TODO stop it;
-						if(queu.internalArray && getState() == READY_TO_WRITE) {
+						else if(queu.internalArray && getState() == READY_TO_WRITE) {
 							var request = queu.processQueu();
 							setState(WRITING);
 							if(request) {
 								console.log("loop: request found")
-								perform(writeFunctions,null,request);
+								perform(writeFunctions, null, request);
 							} else {
-								console.log("loop: no request to proccess");
+								console.error("loop: no request to proccess");
 							}
 						}
-
-					}, 100);
+					}, 50);
 				}
 				this.stop = function() {
 					if(interval) {
@@ -112,14 +121,14 @@ var TEXTPROCESSOR = function() {
 				}
 				return loop;
 			};
-			var loop = new loop();
+		var loop = new loop();
 
 
 		var READY = "READY";
 		var READING = "READING";
+		var READY_TO_READ = "READY_TO_READ";
 		var WRITING = "WRITING";
 		var WRITING_NEXT_READ = "WRITING_NEXT_READ";
-		var READY_TO_READ = "READY_TO_READ";
 		var READY_TO_WRITE = "READY_TO_WRITE";
 
 		var currentState = READY;
@@ -132,18 +141,23 @@ var TEXTPROCESSOR = function() {
 
 
 		var setState = function(requestedState) {
-				if(currentState == READY && requestedState == READING){
-					currentState=READY_TO_READ;
+				console.log("CS: ", currentState, " RS:", requestedState)
+				if(currentState == READY && requestedState == READING) {
+					currentState = READY_TO_READ;
+					return true;
+				}
+				if(currentState == READY_TO_READ && requestedState == READING) {
+					currentState = READING;
+					return true
+				}
+
+				if(currentState == READY && requestedState == WRITING) {
+					currentState = READY_TO_WRITE;
 					return true;
 				}
 
-				if(currentState == READY && requestedState == WRITING){
-					currentState=READY_TO_WRITE;
-					return true;
-				}
-
-				if(currentState == READY_TO_WRITE && requestedState == WRITING){
-					currentState=WRITING;
+				if(currentState == READY_TO_WRITE && requestedState == WRITING) {
+					currentState = WRITING;
 					return true;
 				}
 
@@ -151,6 +165,11 @@ var TEXTPROCESSOR = function() {
 					currentState = WRITING_NEXT_READ;
 					return false;
 				}
+				if(currentState == WRITING_NEXT_READ && requestedState == READY) {
+					currentState = READY_TO_READ;
+					return true
+				}
+
 				if(currentState == WRITING && requestedState == WRITING) {
 					return false;
 				}
@@ -158,32 +177,17 @@ var TEXTPROCESSOR = function() {
 					currentState = READY;
 					return true;
 				}
-				if(currentState == READING && requestedState == WRITING) {
-					
-					return false;
-				}
-
-				if(currentState == WRITING_NEXT_READ && requestedState == READY) {
-					currentState = READY_TO_READ;
-					return true
-				}
-				if(currentState == WRITING_NEXT_READ && requestedState == READING) {
-					return false;
-				}
 				if(currentState == READING && requestedState == READY) {
 					currentState = READY;
 					return true
 				}
-				if(currentState == READY_TO_READ && requestedState == READING) {
-					currentState = READING;
-					return true
-				}
 
-				console.error("setState: no logical branch found")
+				console.error("setState: no logical branch found, falling to default state")
+
 				return false;
 			}
 
-			TextProcessor.setState = setState;
+		TextProcessor.setState = setState;
 
 		return TextProcessor;
 	}
@@ -192,3 +196,10 @@ textProcessor = new TEXTPROCESSOR();
 
 textProcessor.start();
 
+writeFunctions = [function(request) {
+	$("#input").html(request);
+}]
+
+readFunctions = [function(request) {
+	return $("#input").html();
+}]
