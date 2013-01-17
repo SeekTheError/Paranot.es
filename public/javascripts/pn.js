@@ -84,9 +84,7 @@ PN = function() {
 			pn.load();
 			return false;
 		})
-		/**
-		 *
-		 */
+
 		$('#deleteFile').live("click", function(event) {
 			event.preventDefault();
 			var fileName = $("#input").data('path');
@@ -103,27 +101,11 @@ PN = function() {
 
 
 		/*
-		 * variable to prevent data loss when changing file
+		 * Save when changing file
 		 */
-
 		$("#input").focusout(function(event) {
 			event.preventDefault();
-			if(Store.inputSync) {
-				pn.save();
-			}
-		});
-
-		/**
-		 * Save button for tactile interfaces
-		 */
-		$('#save').click(function(event) {
-			event.preventDefault();
-			console.log("SAVE");
-			if(Store.inputSync) {
-				pn.save();
-				Store.inputSync = false;
-			}
-			return false;
+			pn.save();
 		});
 
 		/**
@@ -139,7 +121,6 @@ PN = function() {
 		/**
 		 * Auto save when the content is modified
 		 */
-
 		//the time the user has to stop typing for the saved to be performed
 		var TIME_OUT_VALUE = 100;
 		//the saveStatus var is used in the state machine
@@ -153,14 +134,13 @@ PN = function() {
 			if(Store.saveStatus == "IS_TYPING") {
 				//this variable will show weither the content has been modified after the call to
 				//setTimeout. If not it will be saved. Without this, every keyUp event will trigger a save
-				var lastInputContent = $("#input").html();
+				var beforeTimeoutInputContent = $("#input").html();
 				setTimeout(function() {
 					var inputContent = $("#input").html();
-					if(inputContent == lastInputContent && Store.lastSavedInput != inputContent) {
+					if(Store.saveStatus == "IS_TYPING" && inputContent != beforeTimeoutInputContent) {
 						Store.saveStatus = "DONE_TYPING";
 						Store.lastSavedInput = inputContent;
 						pn.save();
-
 					} else {
 						return;
 					}
@@ -215,13 +195,11 @@ PN = function() {
 		console.log("pn is ready");
 	})(this);
 
-
 	/*
 	 * Load a file
 	 * exposed
 	 * path: an optional path (not used internally)
 	 */
-
 	this.load = function(path) {
 		$("#input").hide();
 		var login = $("#login").val();
@@ -263,45 +241,33 @@ PN = function() {
 	 * exposed
 	 */
 	this.save = function() {
-		var input =textProcessor.getInput();
-		if(input){
-		var login = $("#login").val();
-		var pass = $("#pass").val();
 		var path = $("#input").data('path');
-		console.log("saving:", path);
-		//TODO check if this bug is gone!!!
 		if(!path) {
-			console.log("abort, cause: no path");
-			return;
+			console.error("abort, cause: no path");
+		} else {
+			$("#saveStatus").html("Saving...");
+			var input = textProcessor.getInput(path);
+			if(input) {
+				var login = $("#login").val();
+				var pass = $("#pass").val();
+				var content = CryptoJS.AES.encrypt(input, pass).toString();
+				var key = CryptoJS.SHA1(login + pass).toString();
+				var data = {
+					login: encodeURIComponent(login),
+					key: encodeURIComponent(key),
+					path: path,
+					content: content
+				}
+				console.log("saving:", path);
+				Socket.emit('saveFile', data);
+			}
+			pn.getUUIDS();
 		}
-
-		var content = CryptoJS.AES.encrypt(input, pass).toString();
-		var key = CryptoJS.SHA1(login + pass).toString();
-
-		var data = {
-			login: encodeURIComponent(login),
-			key: encodeURIComponent(key),
-			path: path,
-			content: content
-		}
-		$("#saveStatus").html("Saving");
-		Socket.emit('saveFile', data);
-		
-		}
-		pn.getUUIDS();
 	}
 
-	this.send= function (input){
+	this.send = function(input, path) {
 		var login = $("#login").val();
 		var pass = $("#pass").val();
-		var path = $("#input").data('path');
-		console.log("saving:", path);
-		//TODO check if this bug is gone!!!
-		if(!path) {
-			console.log("abort, cause: no path");
-			return;
-		}
-
 		var content = CryptoJS.AES.encrypt(input, pass).toString();
 		var key = CryptoJS.SHA1(login + pass).toString();
 
@@ -311,22 +277,20 @@ PN = function() {
 			path: path,
 			content: content
 		}
-		$("#saveStatus").html("Saving");
 		Socket.emit('saveFile', data);
+		console.log("saving:", path);
+		$("#saveStatus").html("Saving");
 	}
 
 	this.createFile = function(path) {
-		//setting the path to display
 		Store.nextPath = encodeURIComponent(path);
-		console.log("creating new file: " + path);
 		$("#newFileName").html("<i>New Note</i>")
 		var input = $("#input").html();
 		var login = $("#login").val();
 		var pass = $("#pass").val();
-		// init the content
 		var init = JSON.stringify([{
 			i: 1,
-			content: "&nbsp;"
+			content: "<div>&nbsp;</div>"
 		}]);
 		var content = CryptoJS.AES.encrypt(init, pass).toString();
 		var key = CryptoJS.SHA1(login + pass).toString();
@@ -337,10 +301,9 @@ PN = function() {
 			content: content,
 			newFile: true
 		}
+		console.log("creating new file: " + path);
 		Socket.emit("saveFile", data);
-
 	}
-
 
 	this.deleteFile = function() {
 		$("#input").html("");
@@ -421,8 +384,7 @@ PN = function() {
 	/*
 	 * Decrypt and display a note
 	 */
-
-	this.displayContent = function(response,reload) {
+	this.displayContent = function(response, reload) {
 		if(response) {
 			$("#input").show();
 			$("#input").attr('contenteditable', 'true');
@@ -438,15 +400,12 @@ PN = function() {
 			//Now the 
 			textProcessor.setOutput(result);
 
-			if(reload)pn.ExposedStore.modeReload = true;
+			if(reload) pn.ExposedStore.modeReload = true;
 			// init the autosave function for the new note
 			Store.lastSavedInput = result.toString();
 			$("#input").data('path', response.path);
 			pn.currentPath = response.path;
 			console.log("Loaded");
-
-			//this prevent a reload when the .focus method is called
-			Store.inputSync = true;
 		}
 	}
 
@@ -481,9 +440,7 @@ PN = function() {
 		}
 	}
 
-	/*
-	 *Route Event originated from a server response
-	 */
+	//Route Event originated from a server response
 
 	function dispatch(response) {
 		if(response.status == "userCreated") {
@@ -503,7 +460,6 @@ PN = function() {
 			}
 			return;
 		}
-
 		if(response.status == "invalidCredentials") {
 			$(".command").hide();
 			window.alert("Invalid Password");
@@ -579,16 +535,13 @@ PN = function() {
 		$('#newFileName').html('<i>New Note</i>');
 	});
 	Socket.on("fileUpdated", function(data) {
-		console.log("file updated on path:",data.path);
-		if(data.path == pn.currentPath){
-			
+		console.log("file updated on path:", data.path);
+		if(data.path == pn.currentPath) {
+
 			console.log()
-			pn.displayContent(data,true)
+			pn.displayContent(data, true)
 		}
-		
-
 	});
-
 }
 
 

@@ -9,6 +9,15 @@ var TEXTPROCESSOR = function() {
 
 		TextProcessor.cursor = null;
 
+		TextProcessor.start = function(){
+			loop.start()
+		}
+
+		TextProcessor.stop = function(){
+			loop.stop()
+		}
+
+
 		TextProcessor.getInput = function() {
 			if(setState(READING)) {
 				var result = performOnInput();
@@ -156,7 +165,7 @@ var TEXTPROCESSOR = function() {
 
 		function performOnInput() {
 			var pipe;
-			for(var i = 0; i < onInputFunctions.length; i++) {
+			for(var i = 0; i < onReadFunctions.length; i++) {
 				pipe = onReadFunctions[i](pipe);
 			}
 			setState(READY);
@@ -165,7 +174,7 @@ var TEXTPROCESSOR = function() {
 
 		function performOnOutput(rawOutput) {
 			var pipe = rawOutput;
-			for(var i = 0; i < onOutputFunctions.length; i++) {
+			for(var i = 0; i < onWriteFunctions.length; i++) {
 				pipe = onWriteFunctions[i](pipe);
 			}
 			setState(READY);
@@ -198,7 +207,8 @@ var TEXTPROCESSOR = function() {
 				return this;
 			}
 
-
+		var queu = new queu();
+		
 
 		var loop = function() {
 				loop = this;
@@ -215,8 +225,8 @@ var TEXTPROCESSOR = function() {
 							return;
 						}
 						//TODO stop it;
-						if(TextProcessor.queu.hasRequest() && setState("WRITING")) {
-							request = TextProcessor.queu.processQueu();
+						if(queu.hasRequest() && setState("WRITING")) {
+							request = queu.processQueu();
 							if(request) {
 								console.log("loop: request found")
 								performOnOutput(request);
@@ -231,11 +241,10 @@ var TEXTPROCESSOR = function() {
 					if(interval) {
 						clearInterval(interval);
 					}
-
 				}
 				return loop;
 			};
-
+			var loop = new loop();
 
 
 		var READY = "READY";
@@ -290,16 +299,10 @@ var TEXTPROCESSOR = function() {
 
 			TextProcessor.setState = setState;
 
-		(function(TextProcessor){
-			TextProcessor.queu = new queu();
-			TextProcessor.loop = new loop();
-		})(TextProcessor);
-		
-
 		return TextProcessor;
 	}
 
 textProcessor = new TEXTPROCESSOR();
 
-textProcessor.loop.start();
+textProcessor.start();
 
