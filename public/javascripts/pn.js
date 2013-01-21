@@ -493,7 +493,6 @@ PN = function() {
 
 	Socket.on("fileDontExist", function(data) {
 		console.log("file don't exist");
-		//alert("This file have been remove");
 	});
 
 	Socket.on("invalidCredentials", function() {
@@ -530,10 +529,8 @@ PN = function() {
 
 function loadExtensions(pn){
 console.log("Loading pn extensions");
-
 //allow to click links on the content editable
 (function (){
-	
 $('#input a').live('click',function(event){
 	if(!pn.currentPath) return;
 	event.preventDefault();var url=$(event.target).attr("href"); window.open(url, '_blank');
