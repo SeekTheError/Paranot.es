@@ -27,7 +27,7 @@ var UI = function(pn) {
 			$("#newFileName").html("")
 		}
 		ui.focusOnNewFileName = function() {
-			$("#newFileName").html("")
+			$("#newFileName").html("").focus()
 		}
 
 		ui.hideCommands = function() {
@@ -56,7 +56,7 @@ var UI = function(pn) {
 			for(var i = 0; i < tabs.length; i++) {
 				var nav = $('<li>').html('<a class="file" href="#" data-toggle="tab">' + decodeURIComponent(tabs[i]) + '</a>')
 				//if next path has been set on the createFile function
-				if(Store.nextPath == decodeURIComponent(tabs[i])) {
+				if(pn.nextPath == decodeURIComponent(tabs[i])) {
 					$(nav).addClass("active");
 					empty = false;
 				}
@@ -180,9 +180,8 @@ var UI = function(pn) {
 				var lastInputContent = $("#input").html();
 				setTimeout(function() {
 					var inputContent = $("#input").html();
-					if(inputContent == lastInputContent && Store.lastSavedInput != inputContent) {
+					if(inputContent && inputContent == lastInputContent && Store.currentState != "DONE_TYPING") {
 						Store.currentState = "DONE_TYPING";
-						Store.lastSavedInput = inputContent;
 						pn.save();
 
 					} else {
@@ -224,9 +223,8 @@ var UI = function(pn) {
 		 */
 		$("#addNewFile").click(function(event) {
 			event.preventDefault();
-			var fileName;
-			if(!(fileName = $('#newFileName').val())) {
-				ui.clearFileName();
+			var fileName=$('#newFileName').val()
+			if(!fileName) {
 				ui.focusOnNewFileName();
 			} else {
 				pn.createFile(fileName);
