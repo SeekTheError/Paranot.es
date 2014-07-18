@@ -7,7 +7,8 @@ var path = require('path');
 var socketio = require('socket.io');
 
 var app = express();
-
+var redis = require('redis');
+var client = redis.createClient();
 
 var port = process.env.PORT;
 app.configure(function() {
@@ -17,7 +18,7 @@ app.configure(function() {
   app.set('view engine', 'ejs');
   app.use(express.favicon());
   app.use(express.static(path.join(__dirname, 'public')));
-  app.use(express.logger("short"));
+  app.use(express.logger('short'));
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(app.router);
@@ -33,21 +34,19 @@ app.post('/createUser', routes.createUser);
 app.post('/checkUser', routes.checkUser);
 app.post('/deleteFile', routes.deleteFile);
 
-
 var server = http.createServer(app).listen(app.get('port'), function() {
-  console.log("Express server listening on port " + app.get('port'));
+  console.log('Paranot.es server listening on port ' + app.get('port'));
 });
 
-io = socketio.listen(server);
+var io = socketio.listen(server);
 
 var redisPort = 6379;
 var redisHost = 'localhost';
 
-var RedisStore = require('socket.io/lib/stores/redis'),
-  redis = require('socket.io/node_modules/redis'),
-  pub = redis.createClient(redisPort, redisHost),
-  sub = redis.createClient(redisPort, redisHost),
-  store = redis.createClient(redisPort, redisHost);
+var RedisStore = require('socket.io-redis');
+var pub = redis.createClient(redisPort, redisHost);
+var sub = redis.createClient(redisPort, redisHost);
+var store = redis.createClient(redisPort, redisHost);
 
 //global redis client
 client = redis.createClient(redisPort, redisHost);
@@ -72,4 +71,4 @@ io.configure(function() {
   }));
 });
 
-var realtime = require('./realtime/rt.js');
+var realtime = require('./realtime/rt.js')(io, client);
