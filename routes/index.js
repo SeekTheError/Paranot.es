@@ -121,12 +121,13 @@ exports.checkUser = function(req, res) {
       res.send({
         status: "userDontExist"
       });
-    } else {
-      if(reply == params.key) {
-        pathsNamespace = getUserNameSpace(params) + ":*"
+    }
+    else {
+      if (reply === params.key) {
+        var pathsNamespace = getUserNameSpace(params) + ':*'
         client.keys(pathsNamespace, function(err, reply) {
           var paths = reply;
-          for(var i = paths.length - 1; i >= 0; i--) {
+          for (var i = paths.length - 1; i >= 0; i--) {
             paths[i] = paths[i].substring(pathsNamespace.length - 1)
           };
           res.send({

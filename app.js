@@ -55,8 +55,12 @@ client = redis.createClient(redisPort, redisHost);
 /*pub.auth(password, function (err) { if (err) throw err; });
 sub.auth(password, function (err) { if (err) throw err; });
 client.auth(password, function (err) { if (err) throw err; });*/
-
-io.configure(function() {
+  io.set('store', new RedisStore({
+    redisPub: pub,
+    redisSub: sub,
+    redisClient: store
+  }));
+/**io.configure(function() {
   io.enable('browser client minification'); // send minified client
   io.enable('browser client etag'); // apply etag caching logic based on version number
   io.enable('browser client gzip'); // gzip the file
@@ -64,11 +68,9 @@ io.configure(function() {
   io.set('transports', [ // enable all transports (optional if you want flashsocket)
   'websocket', 'flashsocket', 'htmlfile', 'xhr-polling', 'jsonp-polling']);
   var RedisStore = require('socket.io/lib/stores/redis');
-  io.set('store', new RedisStore({
-    redisPub: pub,
-    redisSub: sub,
-    redisClient: store
-  }));
-});
 
-var realtime = require('./realtime/rt.js')(io, client);
+});*/
+
+// enable socket io
+var realtime = require('./realtime/rt.js');
+realtime(io, client);

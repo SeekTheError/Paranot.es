@@ -1,8 +1,11 @@
 'use strict';
 
-module.exports = function(io) {
+module.exports = function(io, client) {
 
   io.sockets.on('connection', function(socket) {
+      socket.namespace = {
+        manager: {}
+      };
     socket.emit('connected', {
       status: 'connected'
     });
@@ -12,23 +15,27 @@ module.exports = function(io) {
         return;
       }
       client.get(getUserNameSpace(data), function(err, reply) {
-        if(!reply) {
+        if (!reply) {
           socket.emit("userDontExist");
-        } else {
-          if(reply != data.key) {
+        }
+        else {
+          if (reply !== data.key) {
             socket.emit("refused");
-          } else {
+          }
+          else {
             client.get(getContentPath(data), function(err, reply) {
-              if(reply && data.newFile) {
+              if (reply && data.newFile) {
                 socket.emit('fileAlreadyExist');
-              } else {
+              }
+              else {
                 client.set(getContentPath(data), data.content, function(err, reply) {
-                  if(reply) {
+                  if (reply) {
                     var status = data.newFile ? "fileCreated" : "fileSaved";
                     socket.broadcast.to(getContentPath(data)).emit('fileUpdated');
-                    status == 'fileCreated' ? socket.broadcast.to(getUserNameSpace(data)).emit('fileCreated') : '';
+                    status === 'fileCreated' ? socket.broadcast.to(getUserNameSpace(data)).emit('fileCreated') : '';
                     socket.emit(status);
-                  } else {
+                  }
+                  else {
                     socket.emit({
                       status: "error",
                       message: "troube while saving"
@@ -53,7 +60,7 @@ module.exports = function(io) {
           } else {
             //removing old room for the socket
             console.log(socket.id, "leaving all room");
-            socket.namespace.manager.rooms = {};
+              socket.namespace.manager.rooms = {};
             socket.join(getUserNameSpace(data));
             console.log(socket.id, "joining room ", getUserNameSpace(data));
             client.get(getContentPath(data), function(err, reply) {
