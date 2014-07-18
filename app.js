@@ -40,6 +40,8 @@ var server = http.createServer(app).listen(app.get('port'), function() {
 
 var io = socketio.listen(server);
 
+routes.init(io);
+
 var redisPort = 6379;
 var redisHost = 'localhost';
 

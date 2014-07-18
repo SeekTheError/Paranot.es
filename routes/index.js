@@ -1,6 +1,12 @@
 'use strict';
 
-exports.index = function(req, res) {
+var io = null;
+
+module.exports.init = function(ioG) {
+  io =ioG;
+};
+
+module.exports.index = function(req, res) {
   res.render('index');
 };
 
