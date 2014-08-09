@@ -3,7 +3,7 @@
 var io = null;
 
 module.exports.init = function(ioG) {
-  io =ioG;
+  io = ioG;
 };
 
 module.exports.index = function(req, res) {
@@ -92,64 +92,66 @@ exports.deleteFile = function(req, res) {
           client.del(getContentPath(params), function(err, reply) {
             if (reply) {
               res.send({
-                status: "fileDeleted"
+                status: 'fileDeleted',
               });
               io.sockets.in(getUserNameSpace(params)).emit('fileDeleted');
             }
             else {
               res.send({
-                status: "error",
-                message: "Could not delete the file"
+                status: 'error',
+                message: 'Could not delete the file',
               });
             }
           });
-        } else {
+        }
+        else {
           res.send({
-            status: "deleteFileDontExist"
+            status: 'deleteFileDontExist',
           });
         }
       });
     }
-  })
+  });
 };
-
 
 /*
 * Return userExist and the file that the user have
 */
 exports.checkUser = function(req, res) {
   var params = req.body;
-  if(!credentialsSet(params, res)) {
+  if (!credentialsSet(params, res)) {
     return;
   }
+
   client.get(getUserNameSpace(params), function(err, reply) {
-    if(!reply) {
+    if (!reply) {
       res.send({
-        status: "userDontExist"
+        status: 'userDontExist',
       });
     }
     else {
       if (reply === params.key) {
-        var pathsNamespace = getUserNameSpace(params) + ':*'
+        var pathsNamespace = getUserNameSpace(params) + ':*';
         client.keys(pathsNamespace, function(err, reply) {
           var paths = reply;
           for (var i = paths.length - 1; i >= 0; i--) {
-            paths[i] = paths[i].substring(pathsNamespace.length - 1)
-          };
+            paths[i] = paths[i].substring(pathsNamespace.length - 1);
+          }
+
           res.send({
-            status: "userExist",
-            paths: paths
+            status: 'userExist',
+            paths: paths,
           });
         });
-      } else {
+      }
+      else {
         res.send({
-          status: "invalidCredentials"
+          status: 'invalidCredentials',
         });
       }
     }
-  })
+  });
 };
-
 
 /**
  * Create a user and a new empty file for a user
@@ -157,27 +159,29 @@ exports.checkUser = function(req, res) {
 exports.createUser = function(req, res) {
   var params = req.body;
   //checking user existence
-  if(!credentialsSet(params, res)) {
+  if (!credentialsSet(params, res)) {
     return;
   }
+
   client.get(getUserNameSpace(params), function(err, reply) {
-    if(!reply) {
-      client.set(getUserNameSpace(params), params.key, function(err, reply) {
+    if (!reply) {
+      client.set(getUserNameSpace(params), params.key, function(/*err, reply*/) {
         //create a doc for a new user
-        var homeNameSpace = getUserNameSpace(params) + ":Home";
-        console.log("creating home: " + homeNameSpace);
+        var homeNameSpace = getUserNameSpace(params) + ':Home';
+
         // x as a value because it won't be allocated if empty
-        client.set(homeNameSpace, "x", function(err, reply) {
-          console.log("home creation response: " + reply)
+        client.set(homeNameSpace, 'x', function(err, reply) {
+          console.log('home creation response: ' + reply);
           res.send({
-            status: "userCreated",
+            status: 'userCreated',
           });
         });
-      })
-    } else {
+      });
+    }
+    else {
       res.send({
-        status: "error",
-        message: "trying to create a user that already exist"
+        status: 'error',
+        message: 'trying to create a user that already exist',
       });
     }
   });

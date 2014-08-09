@@ -16,11 +16,11 @@ module.exports = function(io, client) {
       }
       client.get(getUserNameSpace(data), function(err, reply) {
         if (!reply) {
-          socket.emit("userDontExist");
+          socket.emit('userDontExist');
         }
         else {
           if (reply !== data.key) {
-            socket.emit("refused");
+            socket.emit('refused');
           }
           else {
             client.get(getContentPath(data), function(err, reply) {
@@ -30,15 +30,17 @@ module.exports = function(io, client) {
               else {
                 client.set(getContentPath(data), data.content, function(err, reply) {
                   if (reply) {
-                    var status = data.newFile ? "fileCreated" : "fileSaved";
+                    var status = data.newFile ? 'fileCreated' : 'fileSaved';
                     socket.broadcast.to(getContentPath(data)).emit('fileUpdated');
-                    status === 'fileCreated' ? socket.broadcast.to(getUserNameSpace(data)).emit('fileCreated') : '';
+                    if (status === 'fileCreated') {
+                     socket.broadcast.to(getUserNameSpace(data)).emit('fileCreated');
+                    }
                     socket.emit(status);
                   }
                   else {
                     socket.emit({
-                      status: "error",
-                      message: "troube while saving"
+                      status: 'error',
+                      message: 'troube while saving',
                     });
                   }
                 });
@@ -49,75 +51,83 @@ module.exports = function(io, client) {
       });
     });
 
-    socket.on("loadFile", function(data) {
-      if(!guard(socket, data)) return;
+    socket.on('loadFile', function(data) {
+      if (!guard(socket, data)) {
+        return;
+      }
+
       client.get(getUserNameSpace(data), function(err, reply) {
-        if(!reply) {
-          socket.emit("userDontExist");
-        } else {
-          if(reply != data.key) {
-            socket.emit("invalidCredentials");
-          } else {
+        if (!reply) {
+          socket.emit('userDontExist');
+        }
+        else {
+          if (reply !== data.key) {
+            socket.emit('invalidCredentials');
+          }
+          else {
             //removing old room for the socket
-            console.log(socket.id, "leaving all room");
+            console.log(socket.id, 'leaving all room');
               socket.namespace.manager.rooms = {};
             socket.join(getUserNameSpace(data));
-            console.log(socket.id, "joining room ", getUserNameSpace(data));
+            console.log(socket.id, 'joining room ', getUserNameSpace(data));
             client.get(getContentPath(data), function(err, reply) {
-              if(reply) {
+              if (reply) {
                 //join the new room
                 socket.join(getContentPath(data));
-                socket.emit("fileLoaded", {
+                socket.emit('fileLoaded', {
                   content: reply,
-                  path: data.path
+                  path: data.path,
                 });
-              } else {
-                socket.emit("fileDontExist");
               }
-            })
+              else {
+                socket.emit('fileDontExist');
+              }
+            });
           }
         }
-      })
+      });
     });
   });
 
   //helper functions
 
   function guard(socket, data) {
-    if(!credentialsSet(data)) {
-      socket.emit("invalidCredentials");
+    if (!credentialsSet(data)) {
+      socket.emit('invalidCredentials');
       return false;
     }
-    if(!pathSet(data)) {
-      socket.emit("invalidFileName");
+
+    if (!pathSet(data)) {
+      socket.emit('invalidFileName');
       return false;
     }
     return true;
   }
 
   function credentialsSet(params) {
-    if(params.login == "" || params.key == "") {
+    if (params.login === '' || params.key === '') {
       return false;
     }
     return true;
   }
 
-  function pathSet(params, res) {
-    if(params.path == "") {
+  function pathSet(params) {
+    if (params.path === '') {
       return false;
     }
+
     return true;
   }
 
   function getUserNameSpace(params) {
-    return "user:" + params.login;
+    return 'user:' + params.login;
   }
 
   /*
    * return the contentPath, witch is the redis key to a specific note
    */
   function getContentPath(params) {
-    return "user:" + params.login + ":" + params.path;
+    return 'user:' + params.login + ':' + params.path;
   }
 
 };

@@ -11,23 +11,19 @@ var redis = require('redis');
 var client = redis.createClient();
 
 var port = process.env.PORT;
-app.configure(function() {
-  app.set('port', port || 3000);
- // app.set('port', port || 3000);
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'ejs');
-  app.use(express.favicon());
-  app.use(express.static(path.join(__dirname, 'public')));
-  app.use(express.logger('short'));
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
-  app.use(app.router);
 
-});
+app.set('port', port || 3000);
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
+app.use(express.favicon());
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.logger('short'));
+app.use(express.bodyParser());
+app.use(app.router);
 
-app.configure('development', function() {
-  app.use(express.errorHandler());
-});
+if (app.env === 'development') {
+  app.use(express.errorHandler()); 
+}
 
 app.get('/', routes.index);
 app.post('/createUser', routes.createUser);
