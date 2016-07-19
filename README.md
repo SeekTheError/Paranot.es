@@ -1,3 +1,5 @@
+/!\ Archived
+
 ## Paranot.es
 
 Paranot.es is a web application that allow user to manage their notes in a "safe" way,
@@ -15,6 +17,6 @@ once it's install , simply run
 
     node app.js
 
-and open your browser on "localhost:300"
+and open your browser on "localhost:3000"
 
 
